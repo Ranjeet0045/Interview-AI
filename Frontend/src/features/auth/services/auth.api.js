@@ -2,6 +2,17 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+// Global request interceptor to attach token from localStorage
+axios.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
+
 export async function register({username, email, password}){
     try{
         const response = await axios.post(`${API_URL}/api/auth/register`,{
@@ -9,6 +20,9 @@ export async function register({username, email, password}){
         },{
             withCredentials: true
         })
+        if (response.data?.token) {
+            localStorage.setItem("token", response.data.token);
+        }
         return response.data;
     }
     catch(err){
@@ -25,6 +39,9 @@ export async function login({ email, password }) {
         }, {
             withCredentials: true
         });
+        if (response.data?.token) {
+            localStorage.setItem("token", response.data.token);
+        }
         return response.data;
     } catch (err) {
         console.log('Login error:', err?.response?.data || err.message);
@@ -38,6 +55,7 @@ export async function logout(){
         const response = await axios.get(`${API_URL}/api/auth/logout`,{
             withCredentials: true
         })
+        localStorage.removeItem("token");
         return response.data
     }
     catch(err){
