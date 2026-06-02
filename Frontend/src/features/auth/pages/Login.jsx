@@ -15,11 +15,17 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleLogin({ email, password });
-    navigate("/");
+    setErrorMsg("");
+    const success = await handleLogin({ email, password });
+    if (success) {
+      navigate("/");
+    } else {
+      setErrorMsg("Invalid email or password. Please try again.");
+    }
   };
 
   if (loading) {
@@ -65,6 +71,20 @@ const Login = () => {
             <h2>Welcome back</h2>
             <p>Sign in to continue to your interview plans</p>
           </div>
+          {errorMsg && (
+            <div style={{
+              color: "#ef4444",
+              backgroundColor: "#fee2e2",
+              border: "1px solid #fca5a5",
+              borderRadius: "0.375s",
+              padding: "0.75rem",
+              marginBottom: "1rem",
+              textAlign: "center",
+              fontSize: "0.875rem"
+            }}>
+              {errorMsg}
+            </div>
+          )}
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="email">Email</label>

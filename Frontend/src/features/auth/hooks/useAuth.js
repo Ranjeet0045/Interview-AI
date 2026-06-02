@@ -10,9 +10,17 @@ export const useAuth = () => {
         setLoading(true)
         try {
             const data = await login({email, password})
-            setUser(data.user)
+            if (data && data.user) {
+                setUser(data.user)
+                return true;
+            } else {
+                setUser(null)
+                return false;
+            }
         } catch (error) {
             console.error("Login error:", error)
+            setUser(null)
+            return false;
         } finally {
             setLoading(false)
         }
@@ -22,9 +30,17 @@ export const useAuth = () => {
         setLoading(true)
         try {
             const data = await register({username, email, password})
-            setUser(data.user)
+            if (data && data.user) {
+                setUser(data.user)
+                return true;
+            } else {
+                setUser(null)
+                return false;
+            }
         } catch (error) {
             console.error("Register error:", error)
+            setUser(null)
+            return false;
         } finally {
             setLoading(false)
         }
@@ -46,7 +62,9 @@ export const useAuth = () => {
         setLoading(true);
         try {
             const data = await updateProfile({ username, email });
-            setUser(data.user);
+            if (data && data.user) {
+                setUser(data.user);
+            }
             return data;
         } catch (error) {
             console.error("Update profile error:", error);
@@ -60,9 +78,14 @@ export const useAuth = () => {
         const getAndSetUser = async()=>{
             try{
                 const data = await getMe()
-                setUser(data.user)
+                if (data && data.user) {
+                    setUser(data.user)
+                } else {
+                    setUser(null)
+                }
             }catch(err){
                 console.log(err)
+                setUser(null)
             }
             finally{
                 setLoading(false)

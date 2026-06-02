@@ -14,13 +14,19 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const { loading, handleRegister } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({ username, email, password });
-    navigate("/");
+    setErrorMsg("");
+    const success = await handleRegister({ username, email, password });
+    if (success) {
+      navigate("/");
+    } else {
+      setErrorMsg("Failed to create account. Username or email might already be taken.");
+    }
   };
 
   if (loading) {
@@ -66,6 +72,20 @@ const Register = () => {
             <h2>Create account</h2>
             <p>Free to sign up — start analyzing jobs in minutes</p>
           </div>
+          {errorMsg && (
+            <div style={{
+              color: "#ef4444",
+              backgroundColor: "#fee2e2",
+              border: "1px solid #fca5a5",
+              borderRadius: "0.375s",
+              padding: "0.75rem",
+              marginBottom: "1rem",
+              textAlign: "center",
+              fontSize: "0.875rem"
+            }}>
+              {errorMsg}
+            </div>
+          )}
           <form className="auth-form" onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="username">Username</label>
