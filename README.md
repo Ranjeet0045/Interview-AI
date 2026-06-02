@@ -18,33 +18,19 @@
 
 ## 📸 Screenshots
 
-<!-- Add your screenshots below. Replace the placeholder paths with your actual screenshot paths. -->
-
 <div align="center">
 
 ### 🔐 Login Page
-<!-- ![Login Page](./screenshots/login.png) -->
-> *Screenshot coming soon*
+![Login Page](./screenshots/Login_page.png)
 
 ### 📝 Register Page
-<!-- ![Register Page](./screenshots/register.png) -->
-> *Screenshot coming soon*
+![Register Page](./screenshots/Register_page.png)
 
 ### 🏠 Dashboard / Home Page
-<!-- ![Dashboard](./screenshots/dashboard.png) -->
-> *Screenshot coming soon*
+![Dashboard / Home Page](./screenshots/Home_page.png)
 
 ### 📊 Interview Report Page
-<!-- ![Interview Report](./screenshots/interview-report.png) -->
-> *Screenshot coming soon*
-
-### 👤 Profile Page
-<!-- ![Profile](./screenshots/profile.png) -->
-> *Screenshot coming soon*
-
-### 📱 Mobile Responsive View
-<!-- ![Mobile View](./screenshots/mobile.png) -->
-> *Screenshot coming soon*
+![Interview Report Page](./screenshots/Interview_report_page.png)
 
 </div>
 
