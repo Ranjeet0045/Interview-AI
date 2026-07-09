@@ -7,6 +7,15 @@ import JobDescriptionSection from "../components/UI/JobDescriptionSection";
 import UserProfileSection from "../components/UI/UserProfileSection";
 import { useNavigate } from "react-router";
 
+function cleanReportTitle(raw) {
+  if (!raw) return "Untitled plan";
+  return String(raw)
+    .replace(/^Interview\s*Plan\s*[·\-–:]\s*/i, "")
+    .replace(/^interview plan/i, "")
+    .replace(/[…\-·:.\s]+$/g, "")
+    .trim() || "New interview plan";
+}
+
 const Home = () => {
   const { loading, generateReport, reports, deleteReport } = useInterview();
   const { user } = useAuth();
@@ -41,7 +50,7 @@ const Home = () => {
 
   const openDeleteModal = (reportId, title, e) => {
     e.stopPropagation();
-    setDeleteModal({ show: true, reportId, title: title || "this plan" });
+    setDeleteModal({ show: true, reportId, title: cleanReportTitle(title) || "this plan" });
   };
   const closeDeleteModal = () => setDeleteModal({ show: false, reportId: null, title: "" });
 
@@ -170,7 +179,7 @@ const Home = () => {
                 >
                   <span className="r-num">{String(i + 1).padStart(2, "0")}</span>
                   <div className="r-body">
-                    <span className="r-title">{r.title}</span>
+                    <span className="r-title">{cleanReportTitle(r.title)}</span>
                     <span className="r-meta">
                       <span>{new Date(r.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}</span>
                       <span>·</span>

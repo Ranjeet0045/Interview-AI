@@ -132,15 +132,32 @@ async function generateInterviewController(req, res){
         // Step 2: Validate and filter — remove non-object array entries
         const sanitizedReport = validateAndTransformReport(parsedReport);
 
-        // Generate title from job description or use default
-        const generateTitle = (jobDesc) => {
-            const jobMatch = jobDesc.match(/(?:job title|role|position):\s*([^\n]+)/i);
-            if (jobMatch && jobMatch[1]) {
-                return `Interview Plan - ${jobMatch[1].trim()}`;
+        // Generate a clean, human-readable plan title from the job description.
+        const generateTitle = (jobDesc = "") => {
+            const text = String(jobDesc).replace(/\s+/g, " ").trim();
+            if (!text) return "Interview Plan";
+
+            // 1) Try common labelled patterns: "Role: ...", "Position: ...", "Job Title: ..."
+            const labelled = text.match(
+                /(?:job\s*title|role|position|title|hiring for)\s*[:\-–]\s*([^\n.,;|]{2,80})/i
+            );
+            if (labelled && labelled[1]) {
+                return `Interview Plan · ${labelled[1].trim().replace(/[.,;|]+$/, "")}`;
             }
-            // Extract first line or first ~50 characters as title
-            const firstLine = jobDesc.split('\n')[0].substring(0, 50);
-            return `Interview Plan - ${firstLine}${firstLine.length === 50 ? '...' : ''}`;
+
+            // 2) Try "We're hiring a <ROLE>" / "Looking for a <ROLE>"
+            const hiring = text.match(
+                /(?:hiring|looking for|seeking|recruiting)\s+(?:a|an|our next)?\s*([A-Z][A-Za-z0-9 +/&\-]{3,60})/
+            );
+            if (hiring && hiring[1]) {
+                return `Interview Plan · ${hiring[1].trim().replace(/[.,;|]+$/, "")}`;
+            }
+
+            // 3) Fallback: take a short first sentence / fragment and stop at natural boundary
+            const firstFragment = text.split(/[.!?\n]/)[0] || text;
+            const words = firstFragment.split(/\s+/).slice(0, 6).join(" ");
+            const clipped = words.length > 42 ? words.slice(0, 42).trim() + "…" : words.trim();
+            return `Interview Plan · ${clipped || "New role"}`;
         };
 
         const interviewReport = await interviewReportModel.create({

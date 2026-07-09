@@ -5,6 +5,19 @@ import { useInterview } from "../hooks/useInterview";
 import { useNavigate } from "react-router";
 import { jsPDF } from "jspdf";
 
+/**
+ * Strip the noisy prefix + trim ellipsis / stray punctuation so the header
+ * reads as a clean role name instead of the raw job description slice.
+ */
+function cleanTitle(raw) {
+  if (!raw) return "Untitled plan";
+  return String(raw)
+    .replace(/^Interview\s*Plan\s*[·\-–:]\s*/i, "")
+    .replace(/^interview plan/i, "")
+    .replace(/[…\-·:.\s]+$/g, "")
+    .trim() || "New interview plan";
+}
+
 const Interview = () => {
   const { report, loading, error } = useInterview();
   const navigate = useNavigate();
@@ -81,7 +94,7 @@ const Interview = () => {
         </button>
         <div className="title-area">
           <span className="t-kicker">Interview Plan</span>
-          <h1>{report.title || "Untitled plan"}</h1>
+          <h1>{cleanTitle(report.title)}</h1>
         </div>
       </header>
 
@@ -294,283 +307,266 @@ const Interview = () => {
   );
 };
 
-/* ─── Client-side PDF generation — parchment/ink themed, safe wrapping ─── */
+/* ─── Client-side PDF generation — polished serif+sans typography ─── */
 function generateResumePdfClientSide(report) {
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const doc = new jsPDF({ unit: "pt", format: "a4", compress: true });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 54;
-  const bottomLimit = pageHeight - margin - 20; // reserve room for footer
-  const usableWidth = pageWidth - margin * 2;
 
-  const title = (report.title || "Interview Study Plan").replace(/^Interview Plan - /i, "");
+  const marginX = 62;
+  const marginTop = 68;
+  const marginBottom = 68;
+  const bottomLimit = pageHeight - marginBottom;
+  const usableWidth = pageWidth - marginX * 2;
+
+  const title = cleanTitle(report.title);
   const created = new Date(report.createdAt || Date.now()).toLocaleDateString(undefined, {
     day: "numeric",
     month: "long",
     year: "numeric",
   });
 
-  // Theme colours
   const INK = [30, 26, 21];
-  const INK_2 = [61, 52, 40];
-  const INK_3 = [90, 79, 62];
+  const INK_2 = [55, 47, 36];
+  const INK_3 = [102, 90, 72];
   const TERRA = [194, 91, 38];
-  const GOLD = [201, 145, 70];
   const RULE = [212, 201, 174];
-  const PAPER_TINT = [240, 232, 211];
+  const RULE_SOFT = [230, 220, 198];
 
-  let y = margin;
+  const F_DISPLAY = "times";
+  const F_BODY = "helvetica";
 
-  const setFont = (size, style = "normal", color = INK) => {
-    doc.setFont("helvetica", style);
+  let y = marginTop;
+
+  const setFont = (family, size, style = "normal", color = INK) => {
+    doc.setFont(family, style);
     doc.setFontSize(size);
     doc.setTextColor(color[0], color[1], color[2]);
   };
+  const newPage = () => { doc.addPage(); y = marginTop; };
+  const ensureSpace = (needed) => { if (y + needed > bottomLimit) newPage(); };
 
-  const newPage = () => {
-    doc.addPage();
-    y = margin;
-  };
-
-  const ensureSpace = (needed) => {
-    if (y + needed > bottomLimit) newPage();
-  };
-
-  /**
-   * Draws (potentially multi-line) text and advances y by the FULL height.
-   * indent: left indent from margin.
-   * Pages break BETWEEN wrapped lines when needed.
-   */
-  const drawWrapped = (text, { size = 11, style = "normal", color = INK, indent = 0, lh = 1.4, spaceAfter = 0 } = {}) => {
-    if (!text) return;
-    setFont(size, style, color);
+  const drawWrapped = (text, {
+    family = F_BODY, size = 11, style = "normal", color = INK,
+    indent = 0, lh = 1.45, spaceAfter = 0,
+  } = {}) => {
+    if (!text && text !== 0) return;
+    setFont(family, size, style, color);
     const lines = doc.splitTextToSize(String(text), usableWidth - indent);
     const lineHeight = size * lh;
     for (const line of lines) {
       if (y + lineHeight > bottomLimit) newPage();
-      doc.text(line, margin + indent, y);
+      doc.text(line, marginX + indent, y);
       y += lineHeight;
     }
     y += spaceAfter;
   };
 
-  const drawRule = (color = RULE, extraTop = 4, extraBottom = 10) => {
+  const drawRule = (color = RULE, extraTop = 6, extraBottom = 14, weight = 0.5) => {
     y += extraTop;
     if (y > bottomLimit) newPage();
     doc.setDrawColor(color[0], color[1], color[2]);
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, pageWidth - margin, y);
+    doc.setLineWidth(weight);
+    doc.line(marginX, y, pageWidth - marginX, y);
     y += extraBottom;
   };
 
-  /**
-   * Coloured section header — accepts kicker + title, keeps them together.
-   */
   const drawSectionHead = (kicker, heading) => {
-    // Reserve ~90pt so the head + rule + first content line don't orphan
-    ensureSpace(90);
-    // Small accent bar
+    ensureSpace(110);
     doc.setFillColor(TERRA[0], TERRA[1], TERRA[2]);
-    doc.rect(margin, y, 22, 3, "F");
-    y += 14;
-    setFont(9, "bold", INK_3);
-    doc.text(String(kicker).toUpperCase(), margin, y);
+    doc.rect(marginX, y, 26, 3, "F");
     y += 18;
-    setFont(20, "bold", INK);
+    setFont(F_BODY, 8.5, "bold", INK_3);
+    doc.setCharSpace(1.2);
+    doc.text(String(kicker).toUpperCase(), marginX, y);
+    doc.setCharSpace(0);
+    y += 22;
+    setFont(F_DISPLAY, 22, "italic", INK);
     const headingLines = doc.splitTextToSize(heading, usableWidth);
-    const lh = 20 * 1.2;
+    const lh = 22 * 1.15;
     for (const line of headingLines) {
       if (y + lh > bottomLimit) newPage();
-      doc.text(line, margin, y);
+      doc.text(line, marginX, y);
       y += lh;
     }
-    drawRule();
+    drawRule(RULE_SOFT, 4, 18, 0.4);
   };
 
-  /**
-   * Question block — keep the question line + first answer line together where possible.
-   */
   const drawQuestion = (index, q) => {
-    ensureSpace(80);
-    const qNumber = `Q${String(index + 1).padStart(2, "0")}.`;
-    // Question label
-    setFont(12, "bold", INK);
-    const qText = `${qNumber}  ${q.question || ""}`;
-    drawWrapped(qText, { size: 12, style: "bold", color: INK, indent: 0, lh: 1.35, spaceAfter: 6 });
+    ensureSpace(90);
+    const num = String(index + 1).padStart(2, "0");
+    setFont(F_DISPLAY, 15, "italic", TERRA);
+    doc.text(num, marginX, y);
+    setFont(F_DISPLAY, 13, "normal", INK);
+    const stemLines = doc.splitTextToSize(q.question || "", usableWidth - 34);
+    const stemLh = 13 * 1.4;
+    let stemY = y;
+    for (const line of stemLines) {
+      if (stemY + stemLh > bottomLimit) { newPage(); stemY = y; }
+      doc.text(line, marginX + 30, stemY);
+      stemY += stemLh;
+    }
+    y = stemY + 4;
 
     if (q.intention) {
-      drawWrapped("Interviewer's intent", { size: 8, style: "bold", color: TERRA, indent: 14, lh: 1.3, spaceAfter: 3 });
-      drawWrapped(q.intention, { size: 10, style: "italic", color: INK_3, indent: 14, lh: 1.5, spaceAfter: 8 });
+      drawWrapped("Interviewer's intent", { family: F_BODY, size: 8, style: "bold", color: TERRA, indent: 30, lh: 1.3, spaceAfter: 4 });
+      drawWrapped(q.intention, { family: F_BODY, size: 10, style: "italic", color: INK_3, indent: 30, lh: 1.55, spaceAfter: 10 });
     }
     if (q.answer) {
-      drawWrapped("Model answer", { size: 8, style: "bold", color: TERRA, indent: 14, lh: 1.3, spaceAfter: 3 });
-      drawWrapped(q.answer, { size: 10, style: "normal", color: INK_2, indent: 14, lh: 1.55, spaceAfter: 6 });
+      drawWrapped("Model answer", { family: F_BODY, size: 8, style: "bold", color: TERRA, indent: 30, lh: 1.3, spaceAfter: 4 });
+      drawWrapped(q.answer, { family: F_BODY, size: 10.5, style: "normal", color: INK_2, indent: 30, lh: 1.6, spaceAfter: 8 });
     }
 
-    // Subtle separator between questions
-    y += 4;
-    if (y > bottomLimit) newPage();
+    if (y + 14 > bottomLimit) newPage();
     else {
-      doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
+      doc.setDrawColor(RULE_SOFT[0], RULE_SOFT[1], RULE_SOFT[2]);
       doc.setLineDashPattern([2, 3], 0);
-      doc.line(margin + 20, y, pageWidth - margin - 20, y);
+      doc.line(marginX + 30, y + 2, pageWidth - marginX - 30, y + 2);
       doc.setLineDashPattern([], 0);
-      y += 12;
+      y += 18;
     }
   };
 
   const drawSkillGap = (skill, severity) => {
-    ensureSpace(22);
-    const sev = (severity || "low").toLowerCase();
-    // Colored dot
-    const dotColor = sev === "high" ? [168, 62, 62] : sev === "medium" ? [181, 126, 26] : [90, 125, 63];
-    doc.setFillColor(dotColor[0], dotColor[1], dotColor[2]);
-    doc.circle(margin + 4, y - 3, 3, "F");
-    setFont(11, "normal", INK);
-    doc.text(skill || "—", margin + 14, y);
-    setFont(9, "italic", INK_3);
-    doc.text(`(${sev})`, pageWidth - margin, y, { align: "right" });
-    y += 18;
+    ensureSpace(24);
+    const sev = String(severity || "low").toLowerCase();
+    const dot = sev === "high" ? [168, 62, 62] : sev === "medium" ? [181, 126, 26] : [90, 125, 63];
+    doc.setFillColor(dot[0], dot[1], dot[2]);
+    doc.circle(marginX + 5, y - 3.5, 3.2, "F");
+    setFont(F_BODY, 11, "normal", INK);
+    doc.text(skill || "—", marginX + 16, y);
+    setFont(F_BODY, 9, "italic", INK_3);
+    doc.text(sev, pageWidth - marginX, y, { align: "right" });
+    y += 20;
   };
 
   const drawRoadmapDay = (d) => {
-    // Approx block height so we do not split a day mid-page
-    const approxTasks = (d.tasks?.length || 0);
-    const approxHeight = 32 + 18 + approxTasks * 16 + 10;
+    const tasks = Array.isArray(d.tasks) ? d.tasks : [];
+    const approxHeight = 40 + 22 + tasks.length * 18 + 14;
     ensureSpace(approxHeight);
 
-    // Day tag box
+    const tagX = marginX;
+    const tagY = y - 12;
     doc.setFillColor(INK[0], INK[1], INK[2]);
-    doc.roundedRect(margin, y - 12, 52, 34, 3, 3, "F");
-    setFont(7, "bold", [244, 239, 226]);
-    doc.text("DAY", margin + 26, y - 2, { align: "center" });
-    setFont(14, "bold", [244, 239, 226]);
-    doc.text(String(d.day || ""), margin + 26, y + 14, { align: "center" });
+    doc.roundedRect(tagX, tagY, 56, 40, 4, 4, "F");
+    setFont(F_BODY, 7.5, "bold", [244, 239, 226]);
+    doc.setCharSpace(1);
+    doc.text("DAY", tagX + 28, tagY + 14, { align: "center" });
+    doc.setCharSpace(0);
+    setFont(F_DISPLAY, 17, "italic", [244, 239, 226]);
+    doc.text(String(d.day || ""), tagX + 28, tagY + 32, { align: "center" });
 
-    // Focus title
-    setFont(12, "bold", INK);
-    const focusLines = doc.splitTextToSize(d.focus || "", usableWidth - 68);
-    let localY = y - 2;
+    setFont(F_DISPLAY, 13, "normal", INK);
+    const focusLines = doc.splitTextToSize(d.focus || "", usableWidth - 72);
+    let localY = y;
     for (const line of focusLines) {
-      doc.text(line, margin + 64, localY);
+      doc.text(line, marginX + 70, localY);
       localY += 15;
     }
+    y = Math.max(y + 32, localY + 4);
 
-    y = Math.max(y + 26, localY + 4);
-
-    // Tasks
-    if (d.tasks?.length) {
-      for (const t of d.tasks) {
+    for (const t of tasks) {
+      if (y > bottomLimit) newPage();
+      setFont(F_BODY, 12, "bold", TERRA);
+      doc.text("·", marginX + 70, y);
+      setFont(F_BODY, 10.5, "normal", INK_2);
+      const taskLines = doc.splitTextToSize(t, usableWidth - 88);
+      for (const line of taskLines) {
         if (y > bottomLimit) newPage();
-        setFont(10, "normal", INK_2);
-        // Terracotta bullet
-        setFont(10, "bold", TERRA);
-        doc.text("·", margin + 68, y);
-        setFont(10, "normal", INK_2);
-        const taskLines = doc.splitTextToSize(t, usableWidth - 84);
-        for (const line of taskLines) {
-          if (y > bottomLimit) newPage();
-          doc.text(line, margin + 78, y);
-          y += 14;
-        }
+        doc.text(line, marginX + 82, y);
+        y += 15;
       }
     }
-    y += 10;
+    y += 12;
   };
 
-  /* ─── COVER / HEADER ─── */
-
-  // Terracotta accent bar
+  /* Cover */
   doc.setFillColor(TERRA[0], TERRA[1], TERRA[2]);
-  doc.rect(margin, y, 40, 3, "F");
-  y += 16;
-
-  setFont(9, "bold", INK_3);
-  doc.text("INTERVIEW AI · STUDY PLAN", margin, y);
+  doc.rect(marginX, y, 44, 3, "F");
   y += 22;
 
-  // Big title (may wrap)
-  setFont(24, "bold", INK);
+  setFont(F_BODY, 9.5, "bold", INK_3);
+  doc.setCharSpace(1.5);
+  doc.text("INTERVIEW AI · YOUR STUDY DESK", marginX, y);
+  doc.setCharSpace(0);
+  y += 30;
+
+  setFont(F_DISPLAY, 30, "italic", INK);
   const titleLines = doc.splitTextToSize(title, usableWidth);
-  const titleLh = 24 * 1.15;
+  const titleLh = 30 * 1.12;
   for (const line of titleLines) {
     if (y + titleLh > bottomLimit) newPage();
-    doc.text(line, margin, y);
+    doc.text(line, marginX, y);
     y += titleLh;
   }
-  y += 4;
-
-  setFont(10, "italic", INK_3);
-  doc.text(`Drafted ${created}`, margin, y);
   y += 6;
-  drawRule();
 
-  // Match score bar
+  setFont(F_BODY, 10, "italic", INK_3);
+  doc.text(`Drafted ${created}`, marginX, y);
+  y += 8;
+  drawRule(RULE, 4, 20);
+
   const score = Math.max(0, Math.min(100, Math.round(report.matchScore || 0)));
-  setFont(9, "bold", INK_3);
-  doc.text("MATCH SCORE", margin, y);
-  setFont(28, "bold", TERRA);
-  doc.text(`${score}%`, pageWidth - margin, y + 4, { align: "right" });
-  y += 12;
-  // Progress bar
-  const barY = y + 8;
-  const barH = 6;
-  doc.setFillColor(RULE[0], RULE[1], RULE[2]);
-  doc.roundedRect(margin, barY, usableWidth, barH, 3, 3, "F");
+  setFont(F_BODY, 9.5, "bold", INK_3);
+  doc.setCharSpace(1.5);
+  doc.text("MATCH SCORE", marginX, y);
+  doc.setCharSpace(0);
+  setFont(F_DISPLAY, 34, "italic", TERRA);
+  doc.text(`${score}%`, pageWidth - marginX, y + 4, { align: "right" });
+  y += 14;
+  const barY = y + 10;
+  const barH = 7;
+  doc.setFillColor(RULE_SOFT[0], RULE_SOFT[1], RULE_SOFT[2]);
+  doc.roundedRect(marginX, barY, usableWidth, barH, 3.5, 3.5, "F");
   doc.setFillColor(TERRA[0], TERRA[1], TERRA[2]);
-  const barFill = Math.max(6, (usableWidth * score) / 100);
-  doc.roundedRect(margin, barY, barFill, barH, 3, 3, "F");
+  const barFill = Math.max(7, (usableWidth * score) / 100);
+  doc.roundedRect(marginX, barY, barFill, barH, 3.5, 3.5, "F");
   y = barY + barH + 4;
-  drawRule();
 
-  /* ─── SECTIONS ─── */
+  setFont(F_DISPLAY, 11, "italic", INK_3);
+  const caption =
+    score >= 75 ? "A strong fit — polish and pursue."
+    : score >= 50 ? "A workable fit — mind the gaps."
+    : "A stretch — study before applying.";
+  doc.text(caption, marginX, y + 14);
+  y += 30;
 
   if (report.technicalQuestions?.length) {
-    drawSectionHead("01 · Technical Questions", "Study your craft");
+    drawSectionHead("01 · Technical Questions", "Study your craft.");
     report.technicalQuestions.forEach((q, i) => drawQuestion(i, q));
   }
-
   if (report.behavioralQuestions?.length) {
-    drawSectionHead("02 · Behavioral Questions", "Rehearse your voice");
+    drawSectionHead("02 · Behavioral Questions", "Rehearse your voice.");
     report.behavioralQuestions.forEach((q, i) => drawQuestion(i, q));
   }
-
   if (report.skillGaps?.length) {
-    drawSectionHead("03 · Skill Gaps", "Where to focus");
+    drawSectionHead("03 · Skill Gaps", "Where to focus.");
     report.skillGaps.forEach((g) => drawSkillGap(g.skill, g.severity));
   }
-
   if (report.preparationPlan?.length) {
-    drawSectionHead("04 · Preparation Roadmap", "A day-by-day reading list");
+    drawSectionHead("04 · Preparation Roadmap", "A day-by-day reading list.");
     report.preparationPlan.forEach((d) => drawRoadmapDay(d));
   }
 
-  /* ─── FOOTER on every page ─── */
   const totalPages = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
-    doc.setDrawColor(RULE[0], RULE[1], RULE[2]);
-    doc.setLineWidth(0.5);
-    doc.line(margin, pageHeight - 32, pageWidth - margin, pageHeight - 32);
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(8);
-    doc.setTextColor(138, 125, 104);
-    doc.text("Interview AI · Your Study Desk", margin, pageHeight - 18);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
-    doc.text(`Page ${p} of ${totalPages}`, pageWidth - margin, pageHeight - 18, {
+    doc.setDrawColor(RULE_SOFT[0], RULE_SOFT[1], RULE_SOFT[2]);
+    doc.setLineWidth(0.4);
+    doc.line(marginX, pageHeight - 40, pageWidth - marginX, pageHeight - 40);
+    setFont(F_DISPLAY, 9.5, "italic", INK_3);
+    doc.text("Interview AI · Your Study Desk", marginX, pageHeight - 22);
+    setFont(F_BODY, 8.5, "normal", INK_3);
+    doc.text(`Page ${p} of ${totalPages}`, pageWidth - marginX, pageHeight - 22, {
       align: "right",
     });
   }
 
-  const safe = (report.title || "interview_ai_plan")
+  const safe = cleanTitle(report.title)
     .replace(/[^a-z0-9]+/gi, "_")
     .replace(/^_+|_+$/g, "")
     .toLowerCase();
   doc.save(`${safe || "interview_ai_plan"}.pdf`);
-  // Silence unused var linter
-  void PAPER_TINT;
-  void GOLD;
 }
 
 export default Interview;
