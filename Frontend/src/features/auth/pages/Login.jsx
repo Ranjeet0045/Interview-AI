@@ -3,10 +3,10 @@ import "../auth.form.scss";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 
-const AUTH_FEATURES = [
-  { icon: "🎯", text: "AI-powered job match scoring" },
-  { icon: "📋", text: "Custom technical & behavioral questions" },
-  { icon: "🗺️", text: "Personalized preparation roadmap" },
+const HIGHLIGHTS = [
+  { text: <>An <strong>AI reading room</strong> that studies the job with you.</> },
+  { text: <>Model answers, <strong>skill gaps</strong>, and a day-by-day roadmap.</> },
+  { text: <>Every plan saved to your <strong>study desk</strong> — quietly.</> },
 ];
 
 const Login = () => {
@@ -21,104 +21,111 @@ const Login = () => {
     e.preventDefault();
     setErrorMsg("");
     const success = await handleLogin({ email, password });
-    if (success) {
-      navigate("/");
-    } else {
-      setErrorMsg("Invalid email or password. Please try again.");
-    }
+    if (success) navigate("/");
+    else setErrorMsg("Those credentials didn't match. Try again.");
   };
 
   if (loading) {
     return (
       <div className="app-loading">
         <div className="app-loading-spinner" aria-hidden />
-        <p>Signing you in…</p>
+        <p>Opening your study desk…</p>
       </div>
     );
   }
 
   return (
     <div className="auth-page">
-      <aside className="auth-brand-panel" aria-hidden={false}>
-        <div className="auth-brand-content">
-          <div className="auth-logo">
-            <span className="auth-logo-icon">✨</span>
-            Interview AI
-          </div>
-          <h1>Prepare smarter. Interview with confidence.</h1>
-          <p>
-            Turn any job posting into a tailored interview plan — questions,
-            answers, and a day-by-day roadmap built for you.
+      <aside className="auth-brand-panel">
+        <div className="auth-brand-top">
+          <span className="brand-mark">S</span>
+          <span>
+            <div className="brand-name">Sanctum</div>
+            <div className="brand-tag">Interview Study Desk</div>
+          </span>
+        </div>
+
+        <div className="auth-brand-body">
+          <div className="auth-kicker">Chapter 01 · Welcome</div>
+          <h1>
+            A quiet place to <em>prepare</em>,<br />
+            think, and interview well.
+          </h1>
+          <p className="lede">
+            Paste a role, hand us your résumé — Sanctum drafts the questions,
+            the model answers, and the reading plan.
           </p>
-          <ul className="auth-features">
-            {AUTH_FEATURES.map((f) => (
-              <li key={f.text}>
-                <span className="feature-icon">{f.icon}</span>
-                {f.text}
+
+          <ol className="auth-brand-list">
+            {HIGHLIGHTS.map((h, i) => (
+              <li key={i}>
+                <span className="list-num">{String(i + 1).padStart(2, "0")}.</span>
+                <span className="list-text">{h.text}</span>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
+
+        <blockquote className="auth-brand-quote">
+          &ldquo;Prepare in silence — let the results speak.&rdquo;
+        </blockquote>
       </aside>
 
       <div className="auth-form-panel">
-        <div className="auth-card">
+        <div className="auth-card page-in">
           <div className="auth-mobile-brand">
-            <span className="auth-logo-icon">✨</span>
-            Interview AI
+            <span className="m-mark">S</span> Sanctum
           </div>
           <div className="auth-card-header">
-            <h2>Welcome back</h2>
-            <p>Sign in to continue to your interview plans</p>
+            <span className="card-kicker">— Sign in</span>
+            <h2>
+              Return to your <em>desk</em>
+            </h2>
+            <p>Enter your credentials to continue your interview studies.</p>
           </div>
-          {errorMsg && (
-            <div style={{
-              color: "#ef4444",
-              backgroundColor: "#fee2e2",
-              border: "1px solid #fca5a5",
-              borderRadius: "0.375s",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              textAlign: "center",
-              fontSize: "0.875rem"
-            }}>
-              {errorMsg}
-            </div>
-          )}
+
+          {errorMsg && <div className="auth-error" data-testid="login-error">{errorMsg}</div>}
+
           <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="email">Email</label>
+            <div className={`field ${email ? "has-value" : ""}`}>
               <input
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 id="email"
                 name="email"
-                placeholder="you@example.com"
                 autoComplete="email"
                 required
+                value={email}
+                data-testid="email-input"
               />
+              <label htmlFor="email">Email address</label>
             </div>
-            <div className="input-group">
-              <label htmlFor="password">Password</label>
+
+            <div className={`field ${password ? "has-value" : ""}`}>
               <input
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 id="password"
                 name="password"
-                placeholder="Enter your password"
                 autoComplete="current-password"
                 required
+                value={password}
+                data-testid="password-input"
               />
+              <label htmlFor="password">Password</label>
             </div>
+
             <button
-              className="button button-primary auth-submit"
+              className="sanctum-btn primary auth-submit"
               type="submit"
+              data-testid="login-submit"
             >
-              Sign in
+              Sign in to Sanctum
             </button>
           </form>
-          <p className="auth-footer-text">
-            Don&apos;t have an account? <Link to="/register">Create one</Link>
+
+          <p className="auth-alt">
+            New to Sanctum? <Link to="/register">Enroll here →</Link>
           </p>
         </div>
       </div>

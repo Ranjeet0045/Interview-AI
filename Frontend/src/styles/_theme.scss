@@ -1,83 +1,117 @@
-// ─── Interview AI Dark Theme ───
-// Premium dark UI with vibrant coral + purple accents
+// ─── Sanctum theme — warm scholarly parchment + ink ───
+// A study-oriented palette that feels like a well-loved reading room.
 
-// Backgrounds
-$dark-bg: #0a0e1a;
-$dark-bg-elevated: #111827;
-$card-bg: #1a1f2e;
-$card-bg-hover: #222839;
+// Paper (backgrounds)
+$paper: #f4efe2;
+$paper-2: #ebe3ce;
+$paper-3: #faf6ea;
+$paper-elevated: #fbf7ec;
+$paper-tint: #f0e8d3;
 
-// Accent palette
-$accent-pink: #ff6b35;          // coral (primary CTA)
-$accent-pink-light: #ff9a5c;    // lighter coral
-$accent-purple: #8b5cf6;        // vibrant purple
-$accent-blue: #3b82f6;          // electric blue
-$accent-gradient: linear-gradient(135deg, $accent-pink 0%, $accent-purple 100%);
-$accent-gradient-soft: linear-gradient(135deg, rgba($accent-pink, 0.15), rgba($accent-purple, 0.10));
+// Ink (text + heavy accents)
+$ink: #1e1a15;
+$ink-2: #3d3428;
+$ink-3: #5a4f3e;
+$ink-muted: #8a7d68;
 
-// Text
-$text-primary: #f1f5f9;
-$text-secondary: #94a3b8;
-$text-muted: #64748b;
+// Warm accents
+$terracotta: #c25b26;
+$terracotta-2: #a94a1e;
+$terracotta-soft: rgba(194, 91, 38, 0.10);
+$gold: #c99146;
+$gold-soft: rgba(201, 145, 70, 0.15);
 
-// Borders
-$border-color: rgba(148, 163, 184, 0.12);
-$border-focus: rgba($accent-pink, 0.5);
-
-// Inputs
-$input-bg: rgba(15, 23, 42, 0.6);
+// Secondary accent
+$forest: #2f4a3a;
+$forest-2: #21372a;
 
 // Semantic
-$success: #22c55e;
-$warning: #f59e0b;
-$error: #ef4444;
+$moss: #5a7d3f;
+$brick: #a83e3e;
+$amber: #b57e1a;
 
-// Radii
-$radius-sm: 10px;
-$radius-md: 14px;
-$radius-lg: 18px;
+// Borders / lines
+$rule: #d4c9ae;
+$rule-2: #c4b898;
+$rule-soft: rgba(30, 26, 21, 0.09);
 
-// Shadows
-$shadow-card: 0 8px 32px rgba(0, 0, 0, 0.25);
-$shadow-glow: 0 0 40px rgba($accent-pink, 0.15);
-$shadow-glow-purple: 0 0 40px rgba($accent-purple, 0.15);
-$shadow-glow-strong: 0 0 60px rgba($accent-pink, 0.25);
+// Radii — soft, book-corner feel
+$r-sm: 6px;
+$r-md: 10px;
+$r-lg: 16px;
+$r-xl: 24px;
+
+// Shadows — warm brown-tinted
+$sh-1: 0 1px 2px rgba(30, 26, 21, 0.05), 0 2px 8px rgba(30, 26, 21, 0.04);
+$sh-2: 0 6px 16px rgba(30, 26, 21, 0.08), 0 2px 6px rgba(30, 26, 21, 0.05);
+$sh-3: 0 18px 40px rgba(30, 26, 21, 0.12), 0 6px 14px rgba(30, 26, 21, 0.06);
+$sh-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
 // Typography
-$font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+$font-display: 'Fraunces', 'Times New Roman', serif;
+$font-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
 
-// Transitions
-$transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-$transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-$transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+// Motion
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+$t-quick: 180ms $ease-out;
+$t-med: 320ms $ease-out;
+$t-slow: 520ms $ease-out;
 
 // Layout
-$container-max: 1280px;
+$container-max: 1180px;
 
 // ─── Mixins ───
 
+@mixin paper-card {
+  background: $paper-elevated;
+  border: 1px solid $rule;
+  border-radius: $r-md;
+  box-shadow: $sh-1, $sh-inset;
+}
+
+@mixin paper-card-hover {
+  border-color: $rule-2;
+  box-shadow: $sh-2, $sh-inset;
+  transform: translateY(-2px);
+}
+
+@mixin ink-underline($color: $terracotta) {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 2px;
+    background: $color;
+    transform-origin: left center;
+    transform: scaleX(0);
+    transition: transform $t-med;
+  }
+  &:hover::after,
+  &.active::after {
+    transform: scaleX(1);
+  }
+}
+
+@mixin grain {
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.08 0 0 0 0.42 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.35;
+    border-radius: inherit;
+  }
+}
+
 @mixin focus-ring {
   outline: none;
-  border-color: $accent-pink;
-  box-shadow: 0 0 0 4px rgba($accent-pink, 0.18), $shadow-glow;
-}
-
-@mixin glass-card {
-  background: rgba($card-bg, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid $border-color;
-  border-radius: $radius-lg;
-}
-
-@mixin glass-card-hover {
-  border-color: rgba($accent-pink, 0.25);
-  box-shadow: $shadow-card, 0 0 30px rgba($accent-pink, 0.08);
-}
-
-@mixin gradient-text {
-  background: $accent-gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  border-color: $terracotta;
+  box-shadow: 0 0 0 4px rgba(194, 91, 38, 0.18);
 }

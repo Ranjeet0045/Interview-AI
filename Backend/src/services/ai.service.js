@@ -1,225 +1,137 @@
-const {GoogleGenAI} = require("@google/genai");
-const puppeteer = require("puppeteer");
-const { z } = require("zod");
-const { zodToJsonSchema } = require("zod-to-json-schema");
+const axios = require("axios");
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
-})
+const EMERGENT_KEY = process.env.EMERGENT_LLM_KEY || process.env.GOOGLE_GENAI_API_KEY;
+const LLM_ENDPOINT =
+    (process.env.INTEGRATION_PROXY_URL || "https://integrations.emergentagent.com") +
+    "/llm/chat/completions";
 
-/**
- * Hand-crafted JSON schema for the Gemini responseSchema config.
- * Using zodToJsonSchema was causing issues — it generates $schema, $ref,
- * and definitions wrappers that Gemini misinterprets, leading to the model
- * returning property names (e.g. "question") as string values instead of
- * actual objects.
- */
-const responseSchema = {
-    type: "object",
-    properties: {
-        matchScore: {
-            type: "number",
-            description: "A score between 0 to 100 indicating how well the candidate's resume matches the job description"
-        },
-        technicalQuestions: {
-            type: "array",
-            description: "A list of technical questions that can be asked in the interview based on the resume and job description",
-            items: {
-                type: "object",
-                properties: {
-                    question: {
-                        type: "string",
-                        description: "The technical question that can be asked in the interview"
-                    },
-                    intention: {
-                        type: "string",
-                        description: "The intention of the interviewer behind asking this question"
-                    },
-                    answer: {
-                        type: "string",
-                        description: "How to answer this question, what to cover, what approach to follow"
-                    }
-                },
-                required: ["question", "intention", "answer"]
-            }
-        },
-        behavioralQuestions: {
-            type: "array",
-            description: "A list of behavioral questions that can be asked in the interview based on the resume and job description",
-            items: {
-                type: "object",
-                properties: {
-                    question: {
-                        type: "string",
-                        description: "The behavioral question that can be asked in the interview"
-                    },
-                    intention: {
-                        type: "string",
-                        description: "The intention of the interviewer behind asking this question"
-                    },
-                    answer: {
-                        type: "string",
-                        description: "How to answer this question, what to cover, what approach to follow"
-                    }
-                },
-                required: ["question", "intention", "answer"]
-            }
-        },
-        skillGaps: {
-            type: "array",
-            description: "A list of skill gaps identified based on the resume and job description",
-            items: {
-                type: "object",
-                properties: {
-                    skill: {
-                        type: "string",
-                        description: "The skill which the candidate is lacking based on the resume and job description"
-                    },
-                    severity: {
-                        type: "string",
-                        enum: ["low", "medium", "high"],
-                        description: "The severity of the skill gap"
-                    }
-                },
-                required: ["skill", "severity"]
-            }
-        },
-        preparationPlan: {
-            type: "array",
-            description: "A day-wise preparation plan for the candidate to prepare for the interview",
-            items: {
-                type: "object",
-                properties: {
-                    day: {
-                        type: "number",
-                        description: "The day number in the preparation plan, starting from 1"
-                    },
-                    focus: {
-                        type: "string",
-                        description: "The focus of the preparation for that day, what topics to cover, what resources to use"
-                    },
-                    tasks: {
-                        type: "array",
-                        description: "The list of tasks to be completed on that day for preparation",
-                        items: {
-                            type: "string"
-                        }
-                    }
-                },
-                required: ["day", "focus", "tasks"]
-            }
-        },
-        title: {
-            type: "string",
-            description: "The title of the interview report"
-        }
-    },
-    required: ["matchScore", "technicalQuestions", "behavioralQuestions", "skillGaps", "preparationPlan"]
-};
+const CHAT_MODEL = "gemini-3-flash-preview";
 
-
-async function generateInterviewReport ({resume, selfDeclaration, jobDescription}){
-
-        const prompt = `You are an expert career coach and interviewer. Based on the candidate's resume, self declaration, and job description, generate an interview report as a JSON object with the following fields:
-        - matchScore: number (0-100)
-        - technicalQuestions: array of {question, intention, answer}
-        - behavioralQuestions: array of {question, intention, answer}
-        - skillGaps: array of {skill, severity (low|medium|high)}
-        - preparationPlan: array of {day, focus, tasks (array of string)}
-
-        Example:
-        {
-            "matchScore": 85,
-            "technicalQuestions": [
-                {"question": "What is a closure?", "intention": "Test JS knowledge", "answer": "A closure is..."}
-            ],
-            "behavioralQuestions": [
-                {"question": "Describe a challenge...", "intention": "Test problem-solving", "answer": "I would..."}
-            ],
-            "skillGaps": [
-                {"skill": "Docker", "severity": "medium"}
-            ],
-            "preparationPlan": [
-                {"day": 1, "focus": "Review JS basics", "tasks": ["Read docs", "Practice problems"]}
-            ]
-        }
-
-        Resume: ${resume}
-        Self Declaration: ${selfDeclaration}
-        Job Description: ${jobDescription}
-        `;
-
-        let response, parsed;
-        try {
-                response = await ai.models.generateContent({
-                        model: "gemini-3-flash-preview",
-                        contents: prompt,
-                        config: {
-                                responseMimeType: "application/json",
-                                responseSchema: responseSchema
-                        }
-                });
-                parsed = JSON.parse(response.text);
-        } catch (err) {
-                throw new Error("AI response could not be parsed as JSON: " + err.message);
-        }
-
-        // Fallback: Ensure all fields exist, even if empty
-        return {
-                matchScore: parsed.matchScore ?? 0,
-                technicalQuestions: parsed.technicalQuestions ?? [],
-                behavioralQuestions: parsed.behavioralQuestions ?? [],
-                skillGaps: parsed.skillGaps ?? [],
-                preparationPlan: parsed.preparationPlan ?? []
-        };
-}
-
-async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
-    return pdfBuffer;
-}
-
-async function generateResumePdf({resume, selfDeclaration, jobDescription}) {
-    const responseSchema = {
-        type: "object",
-        properties: {
-            html: {
-                type: "string",
-                description: "The HTML content of the resume which can be converted to PDF format using a library like Puppeteer"
-            }
-        },
-        required: ["html"]
+async function chat({ system, user, jsonMode = false }) {
+    const payload = {
+        model: CHAT_MODEL,
+        messages: [
+            ...(system ? [{ role: "system", content: system }] : []),
+            { role: "user", content: user },
+        ],
+        ...(jsonMode ? { response_format: { type: "json_object" } } : {}),
     };
-    
-    const prompt = `You are an expert career coach. Based on the candidate's resume, self declaration, and job description, generate a resume content as an HTML string that can be converted to PDF format using a library like Puppeteer. Include styling inside the HTML to make it look professional and beautiful.
-    The content should be concise and highlight the candidate's strengths, skills, and experiences that are most relevant to the job description.It should not sound like AI generated it, but rather like a well-crafted resume created by a professional career coach.
-    The content should be ATS friendly, meaning it should be easily parsable by Applicant Tracking Systems, which often means avoiding complex layouts, graphics, and using standard section headings like "Experience", "Education", "Skills", etc.THe resume should not be so lengthy, it should be ideally 1-2 pages long when converted to PDF format.                                       
-    Resume : ${resume}
-    Self Declaration: ${selfDeclaration}
-    Job Description: ${jobDescription}
-    `;
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: responseSchema,
-        }
+    const { data } = await axios.post(LLM_ENDPOINT, payload, {
+        headers: {
+            Authorization: `Bearer ${EMERGENT_KEY}`,
+            "Content-Type": "application/json",
+        },
+        timeout: 120000,
     });
 
-    console.log("generateResumePdf response:", response.text);
-    const parsed = JSON.parse(response.text);
-    const htmlContent = parsed.html || `<html><body><h1>Resume</h1><pre>${resume}</pre></body></html>`;
-    const pdfBuffer = await generatePdfFromHtml(htmlContent);
-    return pdfBuffer;
+    return data?.choices?.[0]?.message?.content || "";
+}
+
+function extractJson(text) {
+    if (!text) return {};
+    // Strip common code fences
+    const cleaned = text
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```\s*$/, "")
+        .trim();
+    try {
+        return JSON.parse(cleaned);
+    } catch {
+        // Try to grab the largest {...} block
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (match) {
+            try { return JSON.parse(match[0]); } catch { /* fall through */ }
+        }
+        return {};
+    }
+}
+
+async function generateInterviewReport({ resume, selfDeclaration, jobDescription }) {
+    const system =
+        "You are an expert career coach and interviewer. Reply ONLY with valid JSON that matches the requested schema — no prose, no code fences.";
+
+    const user = `Based on the candidate's resume, self-declaration, and job description, produce an interview study plan as a JSON object with exactly these keys:
+{
+  "matchScore": number 0-100,
+  "technicalQuestions": [ { "question": string, "intention": string, "answer": string } ],
+  "behavioralQuestions": [ { "question": string, "intention": string, "answer": string } ],
+  "skillGaps": [ { "skill": string, "severity": "low"|"medium"|"high" } ],
+  "preparationPlan": [ { "day": number, "focus": string, "tasks": [string] } ]
+}
+
+Aim for 5-8 technical questions, 3-5 behavioral, 3-6 skill gaps, and a 5-day plan.
+
+--- RESUME ---
+${resume || "(none provided)"}
+
+--- SELF DECLARATION ---
+${selfDeclaration || "(none provided)"}
+
+--- JOB DESCRIPTION ---
+${jobDescription}`;
+
+    let raw;
+    try {
+        raw = await chat({ system, user, jsonMode: true });
+    } catch (err) {
+        const msg = err?.response?.data?.error?.message || err.message;
+        throw new Error("LLM call failed: " + msg);
+    }
+
+    const parsed = extractJson(raw);
+
+    return {
+        matchScore: Number(parsed.matchScore) || 0,
+        technicalQuestions: Array.isArray(parsed.technicalQuestions) ? parsed.technicalQuestions : [],
+        behavioralQuestions: Array.isArray(parsed.behavioralQuestions) ? parsed.behavioralQuestions : [],
+        skillGaps: Array.isArray(parsed.skillGaps) ? parsed.skillGaps : [],
+        preparationPlan: Array.isArray(parsed.preparationPlan) ? parsed.preparationPlan : [],
+    };
+}
+
+/**
+ * Kept for API compatibility with the old interview.controller.js.
+ * The frontend now generates PDFs client-side (jsPDF), so this
+ * server-side path is no longer the primary flow. If invoked, it
+ * still returns a minimal PDF as a plain Buffer via pdfkit.
+ */
+async function generateResumePdf({ resume }) {
+    // Extremely small dependency-free PDF fallback: return a plain
+    // text-only PDF so any legacy caller still receives a valid buffer.
+    const content = (resume || "Resume").slice(0, 4000);
+    return Buffer.from(minimalPdf(content), "binary");
+}
+
+function minimalPdf(text) {
+    const escaped = text
+        .replace(/\\/g, "\\\\")
+        .replace(/\(/g, "\\(")
+        .replace(/\)/g, "\\)");
+    const stream = `BT /F1 12 Tf 40 780 Td (${escaped.substring(0, 800)}) Tj ET`;
+    const objects = [
+        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj",
+        "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj",
+        "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\nendobj",
+        `4 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj`,
+        "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj",
+    ];
+    let pdf = "%PDF-1.4\n";
+    const offsets = [];
+    for (const obj of objects) {
+        offsets.push(pdf.length);
+        pdf += obj + "\n";
+    }
+    const xrefStart = pdf.length;
+    pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+    for (const off of offsets) {
+        pdf += `${String(off).padStart(10, "0")} 00000 n \n`;
+    }
+    pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+    return pdf;
 }
 
 module.exports = {
     generateInterviewReport,
-    generateResumePdf
-};      
+    generateResumePdf,
+};

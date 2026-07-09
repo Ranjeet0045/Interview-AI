@@ -1,893 +1,601 @@
-@use 'sass:color';
 @use '../../../styles/theme' as *;
 
-$severity-medium: #ff9800;
-$severity-low: #4caf50;
+.interview-wrap {
+  min-height: 100dvh;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  animation: pageIn 620ms $ease-out both;
+}
 
-// ==================== INTERVIEW PAGE LAYOUT ====================
+.interview-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: rgba(244, 239, 226, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $rule;
+  padding: 0.85rem clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .back-btn {
+    background: transparent;
+    border: 1px solid $rule;
+    border-radius: $r-sm;
+    padding: 0.5rem 0.85rem;
+    color: $ink;
+    font-family: $font-body;
+    font-size: 0.88rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all $t-quick;
+
+    &:hover { border-color: $ink; transform: translateX(-2px); }
+  }
+
+  .title-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .t-kicker {
+      font-family: $font-mono;
+      font-size: 0.66rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: $ink-3;
+    }
+
+    h1 {
+      font-family: $font-display;
+      font-weight: 500;
+      font-size: 1.05rem;
+      margin: 0;
+      color: $ink;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: -0.01em;
+    }
+  }
+}
+
 .interview-page {
   display: grid;
-  grid-template-columns: 260px 1fr 300px;
-  min-height: 0;
-  background-color: transparent;
-  gap: 1rem;
-  padding: 1.25rem clamp(1rem, 3vw, 1.5rem) 1.5rem;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 1.25rem;
+  padding: 1.5rem clamp(1rem, 3vw, 1.75rem) 2.5rem;
   max-width: $container-max;
   margin: 0 auto;
   width: 100%;
-  animation: fadeIn 0.3s ease;
 
   @media (max-width: 1100px) {
-    grid-template-columns: 220px 1fr 260px;
-    gap: 0.85rem;
+    grid-template-columns: 250px 1fr 260px;
+    gap: 1rem;
   }
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
-    padding: 1rem;
   }
 }
 
-// ==================== STATE MESSAGE ====================
-.interview-state-message {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  min-height: 60vh;
-  color: $text-secondary;
-  font-size: 1rem;
-
-  &.error {
-    color: $accent-pink;
-  }
-}
-
-// ==================== MOBILE TABS ====================
-.interview-mobile-tabs {
+/* Mobile tabs */
+.interview-tabs {
   display: none;
+  gap: 0.4rem;
+  padding: 0.3rem;
+  background: $paper-3;
+  border: 1px solid $rule;
+  border-radius: $r-sm;
   grid-column: 1 / -1;
-  gap: 0.5rem;
-  padding: 0.25rem;
-  background: $card-bg;
-  border: 1px solid $border-color;
-  border-radius: $radius-md;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 
-  @media (max-width: 900px) {
-    display: flex;
-  }
+  @media (max-width: 900px) { display: flex; }
 
-  .mobile-tab {
+  .m-tab {
     flex: 1;
-    min-width: max-content;
-    padding: 0.65rem 1rem;
-    border: none;
-    border-radius: $radius-sm;
+    padding: 0.6rem 0.5rem;
     background: transparent;
-    color: $text-secondary;
+    border: none;
+    border-radius: $r-sm;
+    color: $ink-3;
+    font-family: $font-body;
+    font-weight: 500;
     font-size: 0.8rem;
-    font-weight: 600;
     cursor: pointer;
-    white-space: nowrap;
-    transition: $transition;
+    transition: all $t-quick;
 
-    &:hover {
-      color: $text-primary;
-      background: rgba($accent-pink, 0.06);
-    }
-
-    &.active {
-      background: rgba($accent-pink, 0.12);
-      color: $accent-pink-light;
-    }
+    &:hover { color: $ink; }
+    &.active { background: $ink; color: $paper; }
   }
 }
 
 @media (max-width: 900px) {
-  .interview-sidebar-left.interview-panel-hidden,
-  .interview-content-main.interview-panel-hidden,
-  .interview-sidebar-right.interview-panel-hidden {
-    display: none;
-  }
+  .interview-hidden { display: none; }
 }
 
-// ==================== LEFT SIDEBAR ====================
-.interview-sidebar-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  background-color: $card-bg;
-  border: 1px solid $border-color;
-  border-radius: 1rem;
+/* ── LEFT — Score & Nav ── */
+.side-left {
+  @include paper-card;
   padding: 1.5rem;
-  height: fit-content;
-  position: sticky;
-  top: 1.5rem;
-
-  @media (max-width: 768px) {
-    position: static;
-    height: auto;
-  }
-}
-
-// ==================== MATCH SCORE ====================
-.match-score-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  text-align: center;
-
-  .match-score-circle {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: $accent-gradient;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    box-shadow: 0 16px 38px rgba($accent-pink, 0.25);
-    transition: $transition;
-
-    &:hover {
-      box-shadow: 0 20px 48px rgba($accent-pink, 0.32);
-      transform: scale(1.03);
-    }
-
-    .score-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .score-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.85);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-  }
-
-  .match-description {
-    font-size: 0.85rem;
-    color: $text-secondary;
-    margin: 0;
-    font-weight: 500;
-  }
-}
-
-// ==================== NAVIGATION ====================
-.interview-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: 0.5rem;
-    color: $text-secondary;
-    cursor: pointer;
-    transition: $transition;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-align: left;
-    white-space: nowrap;
-
-    .nav-icon {
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-
-    &:hover {
-      background-color: rgba($accent-pink, 0.06);
-      color: $text-primary;
-      border-color: $border-color;
-    }
-
-    &.active {
-      background: linear-gradient(135deg, rgba($accent-pink, 0.12), rgba($accent-purple, 0.08));
-      color: $accent-pink;
-      border-color: $accent-pink;
-      box-shadow: inset 0 0 12px rgba($accent-pink, 0.10);
-    }
-  }
-}
-
-// ==================== MAIN CONTENT ====================
-.interview-content-main {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background-color: $card-bg;
-  border: 1px solid $border-color;
-  border-radius: 1rem;
-  padding: 2rem;
+  height: fit-content;
+  position: sticky;
+  top: 5.5rem;
 
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-    gap: 1rem;
+  @media (max-width: 900px) { position: static; }
+}
+
+.score-ring {
+  --score: 0;
+  --size: 150px;
+  --thick: 10px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background:
+    conic-gradient($terracotta calc(var(--score) * 1%), $rule 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.5rem auto 0;
+  position: relative;
+  animation: ringDraw 900ms $ease-out;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: var(--thick);
+    background: $paper-elevated;
+    border-radius: 50%;
   }
 }
 
-.content-header {
+@keyframes ringDraw {
+  from { background: conic-gradient($terracotta 0%, $rule 0); }
+}
+
+.score-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: $font-display;
+
+  .n {
+    font-weight: 500;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: $ink;
+    letter-spacing: -0.03em;
+    font-variation-settings: 'opsz' 96, 'SOFT' 20;
+  }
+
+  .l {
+    font-family: $font-mono;
+    font-size: 0.66rem;
+    letter-spacing: 0.28em;
+    color: $ink-3;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+}
+
+.score-caption {
+  text-align: center;
+  font-family: $font-display;
+  font-style: italic;
+  color: $ink-3;
+  font-size: 0.92rem;
+}
+
+.section-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  border-top: 1px dashed $rule;
+  padding-top: 1.25rem;
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.85rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: $r-sm;
+    color: $ink-3;
+    font-family: $font-body;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all $t-quick;
+
+    &:hover {
+      background: $paper-tint;
+      color: $ink;
+    }
+
+    &.active {
+      background: $ink;
+      color: $paper;
+      box-shadow: 0 1px 0 $ink-2;
+
+      .nav-count { background: rgba(244, 239, 226, 0.15); color: $paper; }
+    }
+
+    .nav-count {
+      margin-left: auto;
+      font-family: $font-mono;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: $paper-tint;
+      color: $ink-3;
+    }
+  }
+}
+
+.download-container {
+  border-top: 1px dashed $rule;
+  padding-top: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid $border-color;
+}
+
+.download-btn {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 0.9rem;
+}
+
+.pdf-error {
+  color: $brick;
+  font-size: 0.82rem;
+  text-align: center;
+  font-family: $font-mono;
+}
+
+/* ── MAIN ── */
+.content-main {
+  @include paper-card;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (max-width: 900px) { padding: 1.5rem 1.25rem; }
+}
+
+.content-head {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid $rule;
+
+  .c-kicker {
+    font-family: $font-mono;
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: $ink-3;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
 
   h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0;
-    @include gradient-text;
+    font-family: $font-display;
+    font-weight: 500;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    letter-spacing: -0.025em;
+    margin: 0 0 0.35rem;
+
+    em { font-style: italic; color: $terracotta; }
   }
 
-  .content-subtitle {
-    font-size: 0.9rem;
-    color: $text-secondary;
-    margin: 0;
-    font-weight: 400;
+  .c-sub {
+    font-family: $font-display;
+    font-style: italic;
+    color: $ink-3;
+    font-size: 0.95rem;
   }
 }
 
-// ==================== QUESTIONS ====================
-.questions-container {
-  flex: 1;
+.q-list {
   display: flex;
   flex-direction: column;
+  gap: 0.7rem;
 }
 
-.questions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-height: 600px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: $border-color;
-    border-radius: 3px;
-
-    &:hover {
-      background-color: $accent-pink;
-    }
-  }
-}
-
-// ==================== QUESTION CARD ====================
-.question-card {
-  background-color: $input-bg;
-  border: 1px solid $border-color;
-  border-radius: 0.75rem;
+.q-card {
+  background: $paper-3;
+  border: 1px solid $rule;
+  border-radius: $r-sm;
   overflow: hidden;
-  transition: $transition;
+  transition: border-color $t-quick, box-shadow $t-quick;
 
-  &:hover {
-    border-color: $accent-pink;
-  }
+  &:hover { border-color: $rule-2; }
 
   &.expanded {
-    border-color: $accent-pink;
-    box-shadow: 0 0 0 4px rgba($accent-pink, 0.10);
+    border-color: $ink;
+    box-shadow: 0 2px 0 $ink-2;
   }
 
-  .question-header {
+  .q-head {
     width: 100%;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
-    padding: 1rem;
-    background-color: transparent;
+    padding: 1rem 1.1rem;
+    background: transparent;
     border: none;
-    cursor: pointer;
     text-align: left;
-    transition: $transition;
+    cursor: pointer;
+    transition: background $t-quick;
 
-    &:hover {
-      background-color: rgba($accent-pink, 0.04);
-    }
-
-    .question-number {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      background: $accent-gradient;
-      border-radius: 50%;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .question-text {
-      flex: 1;
-      color: $text-primary;
-      font-size: 0.95rem;
-      font-weight: 500;
-      line-height: 1.4;
-    }
-
-    .expand-icon {
-      flex-shrink: 0;
-      color: $accent-pink;
-      font-size: 1.5rem;
-      font-weight: 300;
-      line-height: 1;
-      transition: $transition-fast;
-    }
+    &:hover { background: $paper-tint; }
   }
 
-  .question-details {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 0 1rem 1rem;
-    border-top: 1px solid $border-color;
-    animation: slideDown 0.3s ease;
+  .q-num {
+    flex-shrink: 0;
+    font-family: $font-display;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: $terracotta;
+    min-width: 28px;
+    line-height: 1;
+  }
 
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        max-height: 0;
-      }
-      to {
-        opacity: 1;
-        max-height: 500px;
-      }
-    }
+  .q-text {
+    flex: 1;
+    color: $ink;
+    font-family: $font-body;
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
+  .q-toggle {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: $paper-tint;
+    color: $ink;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform $t-med, background $t-quick;
+  }
+
+  &.expanded .q-toggle {
+    background: $ink;
+    color: $paper;
+    transform: rotate(180deg);
+  }
+
+  .q-body {
+    padding: 0.25rem 1.1rem 1.15rem;
+    animation: bodyIn 320ms $ease-out;
 
     h4 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: $accent-pink;
-      margin: 0;
+      font-family: $font-mono;
+      font-size: 0.7rem;
+      letter-spacing: 0.24em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      color: $terracotta;
+      margin: 1rem 0 0.5rem;
+      font-weight: 600;
     }
 
     p {
-      margin: 0.5rem 0 0;
-      color: $text-secondary;
-      font-size: 0.9rem;
-      line-height: 1.6;
+      color: $ink-2;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin: 0;
+      font-family: $font-body;
     }
-  }
-
-  .intention-section {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .answer-section {
-    display: flex;
-    flex-direction: column;
   }
 }
 
-// ==================== ROADMAP ====================
-.roadmap-container {
+@keyframes bodyIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Roadmap */
+.roadmap-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 10px; bottom: 10px;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, $rule 0 4px, transparent 4px 8px);
+  }
 }
 
 .roadmap-day {
   display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background-color: $input-bg;
-  border: 1px solid $border-color;
-  border-radius: 0.75rem;
-  transition: $transition;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  background: $paper-3;
+  border: 1px solid $rule;
+  border-radius: $r-sm;
+  transition: all $t-quick;
+  position: relative;
 
   &:hover {
-    border-color: $accent-pink;
-    box-shadow: 0 0 0 4px rgba($accent-pink, 0.08);
+    border-color: $terracotta;
+    transform: translateX(2px);
   }
 
-  .day-marker {
+  .day-mark {
     flex-shrink: 0;
+    width: 56px; height: 56px;
+    background: $ink;
+    color: $paper;
+    border-radius: $r-sm;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    background: $accent-gradient;
-    border-radius: 0.5rem;
-    font-weight: 700;
-    color: #fff;
-    font-size: 0.9rem;
+    font-family: $font-display;
+    line-height: 1;
+    box-shadow: 0 2px 0 $ink-2;
+    z-index: 1;
+
+    .day-word {
+      font-family: $font-mono;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(244, 239, 226, 0.65);
+      margin-bottom: 3px;
+    }
+    .day-num {
+      font-weight: 600;
+      font-size: 1.4rem;
+      font-style: italic;
+    }
   }
 
-  .day-content {
+  .day-info {
     flex: 1;
 
     h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: $text-primary;
-      margin: 0;
-      line-height: 1.4;
+      font-family: $font-display;
+      font-weight: 500;
+      font-size: 1.05rem;
+      margin: 0 0 0.35rem;
+      color: $ink;
+      letter-spacing: -0.01em;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0.35rem 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      li {
+        color: $ink-2;
+        font-size: 0.88rem;
+        padding-left: 1rem;
+        position: relative;
+
+        &::before {
+          content: '·';
+          position: absolute;
+          left: 0;
+          color: $terracotta;
+          font-weight: 700;
+        }
+      }
     }
   }
 }
 
-// ==================== RIGHT SIDEBAR ====================
-.interview-sidebar-right {
-  background-color: $card-bg;
-  border: 1px solid $border-color;
-  border-radius: 1rem;
+/* ── RIGHT — Skill gaps ── */
+.side-right {
+  @include paper-card;
   padding: 1.5rem;
   height: fit-content;
   position: sticky;
-  top: 1.5rem;
+  top: 5.5rem;
 
-  @media (max-width: 768px) {
-    position: static;
-    height: auto;
-  }
+  @media (max-width: 900px) { position: static; }
 
-  .sidebar-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: $text-primary;
-    margin: 0 0 1.5rem 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid $border-color;
+  .side-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: $ink-3;
+    margin: 0 0 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px dashed $rule;
+    font-weight: 600;
 
     &::before {
       content: '';
-      display: inline-block;
-      width: 4px;
-      height: 20px;
-      background: $accent-gradient;
+      width: 3px;
+      height: 14px;
+      background: $terracotta;
       border-radius: 2px;
     }
   }
 }
 
-// ==================== SKILL GAPS ====================
-.skill-gaps-container {
+.gap-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
-.skill-badge {
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
+.gap {
+  padding: 0.75rem 0.9rem;
+  border-radius: $r-sm;
+  font-size: 0.88rem;
+  font-family: $font-body;
   font-weight: 500;
-  transition: $transition;
-  cursor: default;
   border: 1px solid;
-  background-color: rgba(255, 255, 255, 0.02);
-
-  &.badge-medium {
-    border-color: $severity-medium;
-    color: $severity-medium;
-
-    &::before {
-      content: '⚠️ ';
-      margin-right: 0.5rem;
-    }
-
-    &:hover {
-      background-color: rgba(255, 152, 0, 0.1);
-      box-shadow: 0 0 12px rgba(255, 152, 0, 0.2);
-    }
-  }
-
-  &.badge-low {
-    border-color: $severity-low;
-    color: $severity-low;
-
-    &::before {
-      content: '✓ ';
-      margin-right: 0.5rem;
-    }
-
-    &:hover {
-      background-color: rgba(76, 175, 80, 0.1);
-      box-shadow: 0 0 12px rgba(76, 175, 80, 0.2);
-    }
-  }
-
-  &.badge-high {
-    border-color: $accent-pink;
-    color: $accent-pink;
-
-    &::before {
-      content: '🔴 ';
-      margin-right: 0.5rem;
-    }
-
-    &:hover {
-      background-color: rgba($accent-pink, 0.06);
-      box-shadow: 0 0 0 4px rgba($accent-pink, 0.10);
-    }
-  }
-}
-
-// ==================== RESPONSIVE BREAKPOINTS ====================
-@media (max-width: 1024px) {
-  .interview-page {
-    gap: 0.75rem;
-  }
-
-  .interview-content-main {
-    padding: 1.5rem;
-  }
-}
-
-@media (max-width: 900px) {
-  .interview-sidebar-left,
-  .interview-sidebar-right {
-    position: static;
-    height: auto;
-  }
-
-  .interview-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    .nav-item {
-      flex: 1;
-      min-width: calc(50% - 0.5rem);
-      justify-content: center;
-      padding: 0.75rem;
-      font-size: 0.85rem;
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .interview-page {
-    padding: 0.75rem;
-    gap: 0.75rem;
-  }
-
-  .interview-sidebar-left,
-  .interview-sidebar-right {
-    position: static;
-    height: auto;
-  }
-
-  .content-header h2 {
-    font-size: 1.5rem;
-  }
-
-  .questions-list {
-    max-height: none;
-  }
-
-  .match-score-circle {
-    width: 100px;
-    height: 100px;
-
-    .score-number {
-      font-size: 2rem;
-    }
-  }
-}
-
-// ==================== ANIMATIONS ====================
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ==================== PAGE WRAPPER & HEADER ====================
-.interview-page-wrapper {
-  min-height: 100vh;
-  background-color: $dark-bg;
-  display: flex;
-  flex-direction: column;
-}
-
-.interview-top-header {
+  background: $paper-3;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem clamp(1rem, 3vw, 1.5rem);
-  background-color: rgba($card-bg, 0.95);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid $border-color;
-  gap: 1rem;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-
-  .header-back-btn {
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: 1px solid $border-color;
-    border-radius: 0.5rem;
-    color: $text-primary;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: $transition;
-    white-space: nowrap;
-    flex-shrink: 0;
-
-    &:hover {
-      border-color: $accent-pink;
-      box-shadow: 0 0 12px rgba($accent-pink, 0.15);
-      transform: translateY(-1px);
-    }
-  }
-
-  .header-title-area {
-    flex: 1;
-    min-width: 0;
-
-    h2 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: $text-primary;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  .header-profile-area {
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  .header-profile-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: $accent-gradient;
-    border: none;
-    color: #fff;
-    padding: 0.5rem 0.9rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: $transition;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba($accent-pink, 0.3);
-    }
-
-    .header-profile-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      font-weight: 700;
-    }
-
-    .header-profile-name {
-      max-width: 100px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
-  .header-profile-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 0.5rem;
-    z-index: 1000;
-    animation: headerDropdownSlide 0.2s ease;
-  }
-
-  @keyframes headerDropdownSlide {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .header-profile-menu {
-    background-color: $card-bg;
-    border: 1px solid $border-color;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-    min-width: 200px;
-
-    .header-profile-info {
-      margin-bottom: 0.75rem;
-
-      h4 {
-        margin: 0 0 0.2rem;
-        color: $text-primary;
-        font-size: 0.95rem;
-        font-weight: 600;
-      }
-
-      p {
-        margin: 0;
-        color: $text-secondary;
-        font-size: 0.8rem;
-        word-break: break-word;
-      }
-    }
-
-    hr {
-      border: none;
-      height: 1px;
-      background-color: $border-color;
-      margin: 0.75rem 0;
-    }
-  }
-
-  .header-menu-btn {
-    width: 100%;
-    padding: 0.6rem 0.75rem;
-    background: transparent;
-    border: 1px solid $border-color;
-    color: $text-primary;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: $transition;
-    margin-bottom: 0.4rem;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: $accent-pink;
-    }
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .header-logout-btn {
-    background: linear-gradient(135deg, $accent-pink, #d81b60);
-    border-color: transparent;
-    justify-content: center;
-    font-weight: 600;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba($accent-pink, 0.3);
-      border-color: transparent;
-    }
-  }
-}
-
-// When wrapped, interview-page no longer needs min-height
-.interview-page-wrapper .interview-page {
-  flex: 1;
-  min-height: auto;
-}
-
-@media (max-width: 768px) {
-  .interview-top-header {
-    padding: 0.75rem 1rem;
-    flex-wrap: wrap;
-
-    .header-title-area h2 {
-      font-size: 0.95rem;
-    }
-
-    .header-profile-name {
-      display: none;
-    }
-  }
-}
-
-// ==================== PDF DOWNLOAD ====================
-.sidebar-action-container {
-  margin-top: auto;
-  padding-top: 1.5rem;
-  border-top: 1px solid $border-color;
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
-}
+  transition: all $t-quick;
 
-.download-pdf-btn {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid transparent;
-  background: $accent-gradient;
-  color: #fff;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-shadow: 0 14px 30px rgba($accent-pink, 0.16);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 38px rgba($accent-pink, 0.20);
-    background: linear-gradient(
-      135deg,
-      color.adjust($accent-pink, $lightness: 6%),
-      color.adjust($accent-purple, $lightness: 4%)
-    );
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    background: $border-color;
-    box-shadow: none;
-  }
-
-  .spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid #fff;
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+  }
+
+  &.g-low {
+    border-color: rgba(90, 125, 63, 0.35);
+    color: #405a2c;
+    &::before { background: $moss; }
+    &:hover { background: rgba(90, 125, 63, 0.06); }
+  }
+  &.g-medium {
+    border-color: rgba(181, 126, 26, 0.45);
+    color: #6b4b0f;
+    &::before { background: $amber; }
+    &:hover { background: rgba(181, 126, 26, 0.06); }
+  }
+  &.g-high {
+    border-color: rgba(168, 62, 62, 0.4);
+    color: #7a2727;
+    &::before { background: $brick; }
+    &:hover { background: rgba(168, 62, 62, 0.06); }
   }
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.pdf-error-message {
-  color: $accent-pink;
-  font-size: 0.8rem;
-  margin: 0;
+/* Error/empty state */
+.state-message {
+  padding: 4rem 1rem;
   text-align: center;
-  font-weight: 500;
+  color: $ink-3;
+  font-family: $font-display;
+  font-style: italic;
+  font-size: 1.15rem;
+
+  &.error { color: $brick; }
 }

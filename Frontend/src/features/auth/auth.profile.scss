@@ -1,84 +1,80 @@
 @use '../../styles/theme' as *;
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .profile-page {
   min-height: 100dvh;
-  width: 100%;
-  background: $dark-bg;
-  background-image:
-    radial-gradient(ellipse 80% 55% at 50% -12%, rgba($accent-purple, 0.1), transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 10%, rgba($accent-pink, 0.06), transparent 60%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 3vw, 1.5rem);
-  animation: fadeIn 0.4s ease-out;
+  padding: 3rem clamp(1rem, 3vw, 2rem);
+  max-width: 720px;
+  margin: 0 auto;
+  animation: pageIn 620ms $ease-out both;
 }
 
-.profile-page-header {
-  width: 100%;
-  max-width: 560px;
-  margin-bottom: 1.5rem;
+.profile-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 1rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
 
-  h1 {
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: $text-primary;
-    margin: 0;
-    letter-spacing: -0.01em;
+  .back {
+    background: transparent;
+    border: 1px solid $rule;
+    border-radius: $r-sm;
+    padding: 0.5rem 0.85rem;
+    color: $ink;
+    font-family: $font-body;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all $t-quick;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+
+    &:hover { border-color: $ink; transform: translateX(-2px); }
   }
-}
 
-.profile-back-btn {
-  padding: 0.55rem 1rem;
-  background: $card-bg;
-  border: 1px solid $border-color;
-  border-radius: $radius-sm;
-  color: $text-primary;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: $transition;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: inherit;
+  h1 {
+    font-family: $font-display;
+    font-weight: 500;
+    font-size: 2rem;
+    letter-spacing: -0.02em;
+    margin: 0;
 
-  &:hover {
-    border-color: rgba($accent-pink, 0.28);
-    box-shadow: $shadow-glow;
-    transform: translateY(-1px);
+    em { font-style: italic; color: $terracotta; }
+  }
+
+  .kicker-text {
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: $ink-3;
   }
 }
 
 .profile-card {
-  width: 100%;
-  max-width: 560px;
-  @include glass-card;
-  padding: 2rem 1.75rem;
+  @include paper-card;
+  padding: 2.25rem clamp(1.5rem, 4vw, 2.5rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: $shadow-card;
-  transition: box-shadow $transition;
+  position: relative;
 
-  &:hover {
-    box-shadow: $shadow-card, 0 0 50px rgba($accent-purple, 0.06);
+  /* Corner ornaments */
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    width: 32px; height: 32px;
+    border: 1px solid $ink-3;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  &::before {
+    top: 10px; left: 10px;
+    border-right: none; border-bottom: none;
+  }
+  &::after {
+    bottom: 10px; right: 10px;
+    border-left: none; border-top: none;
   }
 }
 
@@ -86,225 +82,108 @@
   width: 96px;
   height: 96px;
   border-radius: 50%;
-  background: $accent-gradient;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #fff;
+  background: $ink;
+  color: $paper;
+  font-family: $font-display;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 2.5rem;
+  display: flex; align-items: center; justify-content: center;
   margin-bottom: 1rem;
-  box-shadow: 0 18px 44px rgba($accent-pink, 0.3);
-  user-select: none;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: $accent-gradient;
-    z-index: -1;
-    opacity: 0.25;
-    filter: blur(10px);
-  }
+  box-shadow: 0 2px 0 $ink-2, 0 12px 24px rgba(30, 26, 21, 0.16);
 }
 
-.profile-username {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $text-primary;
-  text-align: center;
+.profile-name {
+  font-family: $font-display;
+  font-weight: 500;
+  font-size: 1.6rem;
   margin: 0 0 0.25rem;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .profile-email {
-  font-size: 0.95rem;
-  color: $text-secondary;
-  text-align: center;
+  color: $ink-3;
+  font-size: 0.92rem;
   margin: 0 0 1.5rem;
 }
 
-.profile-details {
+.profile-edit-fields {
   width: 100%;
-  border-top: 1px solid $border-color;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.25rem;
+
+  .sanctum-btn { flex: 1; }
+
+  @media (max-width: 480px) { flex-direction: column; }
+}
+
+.profile-info {
+  width: 100%;
+  border-top: 1px solid $rule;
   padding-top: 1.5rem;
-  margin-top: 0.5rem;
+  margin-top: 1.75rem;
 
   h3 {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: $text-muted;
+    font-family: $font-mono;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    color: $ink-3;
     margin: 0 0 1rem;
+    font-weight: 600;
   }
 }
 
-.profile-detail-item {
+.profile-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 0.85rem 1rem;
-  background: $input-bg;
-  border: 1px solid $border-color;
-  border-radius: $radius-sm;
-  margin-bottom: 0.65rem;
-  transition: border-color $transition-fast;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed $rule;
 
-  &:hover {
-    border-color: rgba($accent-purple, 0.18);
+  &:last-child { border-bottom: none; }
+
+  .k {
+    color: $ink-3;
+    font-size: 0.88rem;
+    font-family: $font-mono;
   }
 
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.profile-detail-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: $text-secondary;
-  white-space: nowrap;
-}
-
-.profile-detail-value {
-  font-size: 0.95rem;
-  color: $text-primary;
-  font-weight: 500;
-  text-align: right;
-  word-break: break-word;
-}
-
-.profile-edit-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background: $input-bg;
-  border: 1px solid $border-color;
-  border-radius: $radius-sm;
-  color: $text-primary;
-  font-size: 1rem;
-  font-family: inherit;
-  outline: none;
-  transition: $transition;
-
-  &::placeholder {
-    color: $text-muted;
-  }
-
-  &:focus {
-    @include focus-ring;
-  }
-
-  & + & {
-    margin-top: 0.75rem;
-  }
-}
-
-.profile-actions {
-  width: 100%;
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.profile-edit-btn,
-.profile-save-btn {
-  flex: 1;
-  padding: 0.8rem 1.25rem;
-  background: $accent-gradient;
-  border: none;
-  border-radius: $radius-sm;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: $transition;
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 42px rgba($accent-pink, 0.25), $shadow-glow;
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: saturate(0.6);
-  }
-}
-
-.profile-cancel-btn {
-  flex: 1;
-  padding: 0.8rem 1.25rem;
-  background: transparent;
-  border: 1px solid $border-color;
-  border-radius: $radius-sm;
-  color: $text-primary;
-  font-size: 0.95rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: $transition;
-
-  &:hover {
-    border-color: $text-secondary;
-    background: rgba(255, 255, 255, 0.03);
+  .v {
+    color: $ink;
+    font-family: $font-display;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
   }
 }
 
 .profile-toast {
   position: fixed;
-  top: 1.25rem;
-  right: 1.25rem;
-  left: 1.25rem;
-  margin-left: auto;
-  max-width: 400px;
-  padding: 1rem 1.15rem;
-  @include glass-card;
-  color: $text-primary;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  padding: 0.9rem 1.15rem;
+  @include paper-card;
+  background: $paper-elevated;
   font-size: 0.9rem;
-  font-weight: 500;
   z-index: 9999;
   opacity: 0;
-  transform: translateY(-12px);
+  transform: translateY(12px);
   pointer-events: none;
-  transition: $transition;
-  box-shadow: $shadow-card;
+  transition: all $t-med;
 
-  &.show {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-
-  &.success {
-    border-left: 4px solid $success;
-  }
-
-  &.error {
-    border-left: 4px solid $error;
-  }
-}
-
-@media (max-width: 540px) {
-  .profile-actions {
-    flex-direction: column;
-  }
-
-  .profile-detail-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.35rem;
-
-    .profile-detail-value {
-      text-align: left;
-    }
-  }
+  &.show { opacity: 1; transform: translateY(0); }
+  &.success { border-left: 3px solid $moss; }
+  &.error { border-left: 3px solid $brick; }
 }

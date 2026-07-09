@@ -1,91 +1,100 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { UserCircle2, FileText, Info, Sparkles } from "lucide-react";
 
 const UserProfileSection = ({
-    jobDescription,
-    selfDescription,
-    setSelfDescription,
-    resumeInputRef,
-    handleGenerateReport,
-    loading
+  jobDescription,
+  selfDescription,
+  setSelfDescription,
+  resumeInputRef,
+  handleGenerateReport,
+  loading,
 }) => {
-    const [uploadedFileName, setUploadedFileName] = useState(null);
+  const [uploadedFileName, setUploadedFileName] = useState(null);
+  const hasSelf = !!selfDescription;
 
-    return (
-        <section className='user-profile-section'>
-            <div className='section-header'>
-                <div className='section-icon'>👤</div>
-                <h2>Your Profile</h2>
-            </div>
+  return (
+    <section className="desk-panel" data-testid="user-profile-section">
+      <div className="desk-panel-head">
+        <div className="h-title">
+          <span className="h-icon">
+            <UserCircle2 size={18} strokeWidth={1.75} />
+          </span>
+          <h2>You — introduce yourself</h2>
+        </div>
+      </div>
 
-            {/* Resume Upload Section */}
-            <div className='resume-upload-group'>
-                <div className='upload-label'>
-                    <span>Upload Resume</span>
-                    <span className='highlight-pink'>*Best Result</span>
-                </div>
-                
-                <label htmlFor='resume' className='file-upload-area'>
-                    {uploadedFileName ? (
-                        <>
-                            <div className='upload-icon'>✅</div>
-                            <p className='uploaded-file'>{uploadedFileName}</p>
-                            <small>Click to change file</small>
-                        </>
-                    ) : (
-                        <>
-                            <div className='upload-icon'>📄</div>
-                            <p>Click to upload or drag & drop</p>
-                            <small>PDF or DOCX (Max 2MB)</small>
-                        </>
-                    )}
-                    <input 
-                        ref={resumeInputRef}
-                        hidden
-                        type='file'
-                        name='resume'
-                        id='resume'
-                        accept='.pdf,.docx'
-                        onChange={(e) => {
-                            if (e.target.files?.[0]) {
-                                setUploadedFileName(e.target.files[0].name);
-                            }
-                        }}
-                    />
-                </label>
-            </div>
+      <div>
+        <span className="desk-field-label">Résumé — <span style={{ color: "#c25b26" }}>strongly recommended</span></span>
 
-            {/* Divider */}
-            <div className='upload-divider'>
-                <span>OR</span>
-            </div>
+        <label htmlFor="resume" className="upload-area" data-testid="resume-upload">
+          {uploadedFileName ? (
+            <>
+              <div className="u-icon">
+                <FileText size={22} strokeWidth={1.75} />
+              </div>
+              <div className="u-file">{uploadedFileName}</div>
+              <div className="u-sub">Click to replace</div>
+            </>
+          ) : (
+            <>
+              <div className="u-icon">
+                <FileText size={22} strokeWidth={1.75} />
+              </div>
+              <div className="u-title">Drop your résumé here</div>
+              <div className="u-sub">PDF or DOCX — up to 2 MB</div>
+            </>
+          )}
+          <input
+            ref={resumeInputRef}
+            hidden
+            type="file"
+            name="resume"
+            id="resume"
+            accept=".pdf,.docx"
+            onChange={(e) => {
+              if (e.target.files?.[0]) setUploadedFileName(e.target.files[0].name);
+            }}
+            data-testid="resume-file-input"
+          />
+        </label>
+      </div>
 
-            {/* Self Description Section */}
-            <div className='self-description-group'>
-                <label htmlFor='selfDescription'>Quick Self-Description</label>
-                <textarea
-                    onChange={(e)=>{setSelfDescription(e.target.value)}}
-                    name='selfDescription'
-                    id='selfDescription'
-                    className='self-description-textarea'
-                    placeholder="Briefly describe your experience, key skills, and years of experience if you don't have a resume handy..."
-                />
-            </div>
+      <div className="upload-divider">
+        <span>or in a few sentences</span>
+      </div>
 
-            {/* Validation Notice */}
-            <div className='validation-notice'>
-                <div className='notice-icon'>ℹ️</div>
-                <p>Either a <strong>Resume</strong> or <strong>Self Description</strong> is required to generate a personalized plan.</p>
-            </div>
+      <div>
+        <span className="desk-field-label">A short self-description</span>
+        <textarea
+          onChange={(e) => setSelfDescription(e.target.value)}
+          name="selfDescription"
+          id="selfDescription"
+          className="self-textarea"
+          value={selfDescription}
+          aria-label="Self description"
+          data-testid="self-description-textarea"
+        />
+      </div>
 
-            {/* Generate Button */}
-            <button 
-                onClick={handleGenerateReport}
-                className='btn-generate-strategy'
-                disabled={loading || (!jobDescription && !selfDescription && !uploadedFileName)}>
-                {loading ? '⏳ Generating...' : '✨ Generate My Interview Strategy'}
-            </button>
-        </section>
-    );
+      <div className="desk-notice">
+        <Info size={18} strokeWidth={1.75} style={{ flexShrink: 0, color: "#c99146" }} />
+        <p style={{ margin: 0 }}>
+          Provide <strong>either a résumé or a self-description</strong> — Sanctum needs a
+          picture of you to draft your plan.
+        </p>
+      </div>
+
+      <button
+        onClick={handleGenerateReport}
+        className="sanctum-btn primary generate-btn"
+        disabled={loading || !jobDescription || (!selfDescription && !uploadedFileName)}
+        data-testid="generate-strategy-btn"
+      >
+        <Sparkles size={16} strokeWidth={1.75} />
+        {loading ? "Drafting your plan…" : "Draft my interview plan"}
+      </button>
+    </section>
+  );
 };
 
 export default UserProfileSection;

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import { BookOpen, User, LogOut } from "lucide-react";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import "./appShell.scss";
 
 const NAV_LINKS = [
-  { to: "/", label: "Dashboard" },
-  { to: "/profile", label: "Profile" },
+  { to: "/", label: "Desk" },
+  { to: "/profile", label: "Study Card" },
 ];
 
 export default function AppShell() {
@@ -19,7 +20,7 @@ export default function AppShell() {
 
   const isAuthPage = useMemo(
     () => pathname === "/login" || pathname === "/register",
-    [pathname],
+    [pathname]
   );
 
   useEffect(() => {
@@ -41,13 +42,14 @@ export default function AppShell() {
 
   return (
     <div className="app-shell">
-      <header className="app-nav">
+      <header className="app-nav" data-testid="app-nav">
         <div className="app-nav-inner">
-          <Link className="app-brand" to="/">
-            <span className="app-brand-mark" aria-hidden>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <Link className="app-brand" to="/" data-testid="brand-link">
+            <span className="brand-mark" aria-hidden>S</span>
+            <span>
+              <span className="brand-text">Sanctum</span>
+              <span className="brand-sub">Interview Study Desk</span>
             </span>
-            <span className="app-brand-text">Interview AI</span>
           </Link>
 
           <nav className={`app-nav-links ${mobileOpen ? "open" : ""}`}>
@@ -60,6 +62,7 @@ export default function AppShell() {
                 to={l.to}
                 end={l.to === "/"}
                 onClick={() => setMobileOpen(false)}
+                data-testid={`nav-${l.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 {l.label}
               </NavLink>
@@ -67,20 +70,13 @@ export default function AppShell() {
           </nav>
 
           <div className="app-nav-actions">
-            <div className="app-lang" aria-label="Language selector">
-              <span className="app-lang-label">EN</span>
-              <span className="app-lang-caret" aria-hidden>
-                ▾
-              </span>
-            </div>
-
             {!user ? (
               <div className="app-auth-actions">
-                <Link className="app-btn app-btn-ghost" to="/login">
-                  Login
+                <Link className="sanctum-btn ghost" to="/login" data-testid="login-link">
+                  Sign in
                 </Link>
-                <Link className="app-btn app-btn-primary" to="/register">
-                  Sign up
+                <Link className="sanctum-btn primary" to="/register" data-testid="register-link">
+                  Enroll
                 </Link>
               </div>
             ) : (
@@ -92,6 +88,7 @@ export default function AppShell() {
                   aria-haspopup="true"
                   aria-expanded={profileOpen}
                   title={user.username}
+                  data-testid="profile-btn"
                 >
                   <span className="app-profile-avatar" aria-hidden>
                     {user.username?.charAt(0).toUpperCase()}
@@ -100,7 +97,7 @@ export default function AppShell() {
                 </button>
 
                 {profileOpen && (
-                  <div className="app-profile-menu" role="menu">
+                  <div className="app-profile-menu" role="menu" data-testid="profile-menu">
                     <div className="app-profile-meta">
                       <div className="app-profile-title">{user.username}</div>
                       <div className="app-profile-sub">{user.email}</div>
@@ -111,17 +108,30 @@ export default function AppShell() {
                       className="app-menu-item"
                       onClick={() => {
                         setProfileOpen(false);
+                        navigate("/");
+                      }}
+                      data-testid="menu-desk"
+                    >
+                      <BookOpen size={16} strokeWidth={1.75} /> The Desk
+                    </button>
+                    <button
+                      type="button"
+                      className="app-menu-item"
+                      onClick={() => {
+                        setProfileOpen(false);
                         navigate("/profile");
                       }}
+                      data-testid="menu-profile"
                     >
-                      My Profile
+                      <User size={16} strokeWidth={1.75} /> Study Card
                     </button>
                     <button
                       type="button"
                       className="app-menu-item danger"
                       onClick={onLogout}
+                      data-testid="menu-logout"
                     >
-                      Logout
+                      <LogOut size={16} strokeWidth={1.75} /> Sign out
                     </button>
                   </div>
                 )}
@@ -134,6 +144,7 @@ export default function AppShell() {
               aria-label="Toggle navigation"
               aria-expanded={mobileOpen}
               onClick={() => setMobileOpen((v) => !v)}
+              data-testid="mobile-menu-btn"
             >
               <span />
               <span />
@@ -149,19 +160,13 @@ export default function AppShell() {
 
       <footer className="app-footer">
         <div className="app-footer-inner">
-          <div className="app-footer-left">
-            <span className="app-footer-brand">Interview AI</span>
-            <span className="app-footer-dot" aria-hidden>
-              •
-            </span>
-            <span className="app-footer-note">AI-powered interview planning</span>
-          </div>
-          <div className="app-footer-right">
-            <span>Built for fast iteration</span>
-          </div>
+          <span className="app-footer-brand">Sanctum</span>
+          <span className="app-footer-motto">
+            &ldquo;Read. Practise. Interview with quiet confidence.&rdquo;
+          </span>
+          <span>© {new Date().getFullYear()}</span>
         </div>
       </footer>
     </div>
   );
 }
-

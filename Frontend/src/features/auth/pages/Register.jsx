@@ -3,10 +3,10 @@ import "../auth.form.scss";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 
-const AUTH_FEATURES = [
-  { icon: "📄", text: "Upload resume or describe yourself" },
-  { icon: "⚡", text: "Reports ready in about 30 seconds" },
-  { icon: "💾", text: "Save and revisit all your plans" },
+const HIGHLIGHTS = [
+  { text: <>Enroll once — <strong>every plan you draft</strong> stays on your desk.</> },
+  { text: <>Import a résumé <strong>or</strong> write a short bio; both work.</> },
+  { text: <>Plans arrive in about <strong>thirty seconds</strong>.</> },
 ];
 
 const Register = () => {
@@ -22,18 +22,15 @@ const Register = () => {
     e.preventDefault();
     setErrorMsg("");
     const success = await handleRegister({ username, email, password });
-    if (success) {
-      navigate("/");
-    } else {
-      setErrorMsg("Failed to create account. Username or email might already be taken.");
-    }
+    if (success) navigate("/");
+    else setErrorMsg("That username or email is already claimed. Try another.");
   };
 
   if (loading) {
     return (
       <div className="app-loading">
         <div className="app-loading-spinner" aria-hidden />
-        <p>Creating your account…</p>
+        <p>Preparing your study desk…</p>
       </div>
     );
   }
@@ -41,97 +38,109 @@ const Register = () => {
   return (
     <div className="auth-page">
       <aside className="auth-brand-panel">
-        <div className="auth-brand-content">
-          <div className="auth-logo">
-            <span className="auth-logo-icon">✨</span>
-            Interview AI
-          </div>
-          <h1>Start your interview prep journey</h1>
-          <p>
-            Join thousands preparing with AI-generated strategies tailored to
-            each role you apply for.
+        <div className="auth-brand-top">
+          <span className="brand-mark">S</span>
+          <span>
+            <div className="brand-name">Sanctum</div>
+            <div className="brand-tag">Interview Study Desk</div>
+          </span>
+        </div>
+
+        <div className="auth-brand-body">
+          <div className="auth-kicker">Chapter 00 · Enroll</div>
+          <h1>
+            Open a <em>study desk</em><br />
+            of your own.
+          </h1>
+          <p className="lede">
+            One account. Every job you apply for becomes a small,
+            structured curriculum you can actually follow.
           </p>
-          <ul className="auth-features">
-            {AUTH_FEATURES.map((f) => (
-              <li key={f.text}>
-                <span className="feature-icon">{f.icon}</span>
-                {f.text}
+
+          <ol className="auth-brand-list">
+            {HIGHLIGHTS.map((h, i) => (
+              <li key={i}>
+                <span className="list-num">{String(i + 1).padStart(2, "0")}.</span>
+                <span className="list-text">{h.text}</span>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
+
+        <blockquote className="auth-brand-quote">
+          &ldquo;The best interviews are read, not improvised.&rdquo;
+        </blockquote>
       </aside>
 
       <div className="auth-form-panel">
-        <div className="auth-card">
+        <div className="auth-card page-in">
           <div className="auth-mobile-brand">
-            <span className="auth-logo-icon">✨</span>
-            Interview AI
+            <span className="m-mark">S</span> Sanctum
           </div>
           <div className="auth-card-header">
-            <h2>Create account</h2>
-            <p>Free to sign up — start analyzing jobs in minutes</p>
+            <span className="card-kicker">— Enroll</span>
+            <h2>
+              Open your <em>study desk</em>
+            </h2>
+            <p>Free to enroll — start reading your first job in minutes.</p>
           </div>
-          {errorMsg && (
-            <div style={{
-              color: "#ef4444",
-              backgroundColor: "#fee2e2",
-              border: "1px solid #fca5a5",
-              borderRadius: "0.375s",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              textAlign: "center",
-              fontSize: "0.875rem"
-            }}>
-              {errorMsg}
-            </div>
-          )}
+
+          {errorMsg && <div className="auth-error" data-testid="register-error">{errorMsg}</div>}
+
           <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="input-group">
-              <label htmlFor="username">Username</label>
+            <div className={`field ${username ? "has-value" : ""}`}>
               <input
                 onChange={(e) => setUsername(e.target.value)}
                 type="text"
                 id="username"
                 name="username"
-                placeholder="Choose a username"
                 autoComplete="username"
                 required
+                value={username}
+                data-testid="username-input"
               />
+              <label htmlFor="username">Username</label>
             </div>
-            <div className="input-group">
-              <label htmlFor="email">Email</label>
+
+            <div className={`field ${email ? "has-value" : ""}`}>
               <input
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 id="email"
                 name="email"
-                placeholder="you@example.com"
                 autoComplete="email"
                 required
+                value={email}
+                data-testid="email-input"
               />
+              <label htmlFor="email">Email address</label>
             </div>
-            <div className="input-group">
-              <label htmlFor="password">Password</label>
+
+            <div className={`field ${password ? "has-value" : ""}`}>
               <input
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 id="password"
                 name="password"
-                placeholder="Create a strong password"
                 autoComplete="new-password"
                 required
+                value={password}
+                data-testid="password-input"
               />
+              <label htmlFor="password">Choose a password</label>
             </div>
+
             <button
-              className="button button-primary auth-submit"
+              className="sanctum-btn primary auth-submit"
               type="submit"
+              data-testid="register-submit"
             >
-              Create account
+              Open my study desk
             </button>
           </form>
-          <p className="auth-footer-text">
-            Already have an account? <Link to="/login">Sign in</Link>
+
+          <p className="auth-alt">
+            Already enrolled? <Link to="/login">Sign in →</Link>
           </p>
         </div>
       </div>
