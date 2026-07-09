@@ -45,10 +45,10 @@ export default function AppShell() {
       <header className="app-nav" data-testid="app-nav">
         <div className="app-nav-inner">
           <Link className="app-brand" to="/" data-testid="brand-link">
-            <span className="brand-mark" aria-hidden>S</span>
+            <span className="brand-mark" aria-hidden>i</span>
             <span>
-              <span className="brand-text">Sanctum</span>
-              <span className="brand-sub">Interview Study Desk</span>
+              <span className="brand-text">Interview AI</span>
+              <span className="brand-sub">Your Study Desk</span>
             </span>
           </Link>
 
@@ -160,7 +160,7 @@ export default function AppShell() {
 
       <footer className="app-footer">
         <div className="app-footer-inner">
-          <span className="app-footer-brand">Sanctum</span>
+          <span className="app-footer-brand">Interview AI</span>
           <span className="app-footer-motto">
             &ldquo;Read. Practise. Interview with quiet confidence.&rdquo;
           </span>

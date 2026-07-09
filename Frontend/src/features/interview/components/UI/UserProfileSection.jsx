@@ -79,7 +79,7 @@ const UserProfileSection = ({
       <div className="desk-notice">
         <Info size={18} strokeWidth={1.75} style={{ flexShrink: 0, color: "#c99146" }} />
         <p style={{ margin: 0 }}>
-          Provide <strong>either a résumé or a self-description</strong> — Sanctum needs a
+          Provide <strong>either a résumé or a self-description</strong> — Interview AI needs a
           picture of you to draft your plan.
         </p>
       </div>

@@ -39,10 +39,10 @@ const Register = () => {
     <div className="auth-page">
       <aside className="auth-brand-panel">
         <div className="auth-brand-top">
-          <span className="brand-mark">S</span>
+          <span className="brand-mark">i</span>
           <span>
-            <div className="brand-name">Sanctum</div>
-            <div className="brand-tag">Interview Study Desk</div>
+            <div className="brand-name">Interview AI</div>
+            <div className="brand-tag">Your Study Desk</div>
           </span>
         </div>
 
@@ -75,7 +75,7 @@ const Register = () => {
       <div className="auth-form-panel">
         <div className="auth-card page-in">
           <div className="auth-mobile-brand">
-            <span className="m-mark">S</span> Sanctum
+            <span className="m-mark">i</span> Interview AI
           </div>
           <div className="auth-card-header">
             <span className="card-kicker">— Enroll</span>

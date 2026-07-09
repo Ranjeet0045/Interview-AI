@@ -38,10 +38,10 @@ const Login = () => {
     <div className="auth-page">
       <aside className="auth-brand-panel">
         <div className="auth-brand-top">
-          <span className="brand-mark">S</span>
+          <span className="brand-mark">i</span>
           <span>
-            <div className="brand-name">Sanctum</div>
-            <div className="brand-tag">Interview Study Desk</div>
+            <div className="brand-name">Interview AI</div>
+            <div className="brand-tag">Your Study Desk</div>
           </span>
         </div>
 
@@ -52,7 +52,7 @@ const Login = () => {
             think, and interview well.
           </h1>
           <p className="lede">
-            Paste a role, hand us your résumé — Sanctum drafts the questions,
+            Paste a role, hand us your résumé — Interview AI drafts the questions,
             the model answers, and the reading plan.
           </p>
 
@@ -74,7 +74,7 @@ const Login = () => {
       <div className="auth-form-panel">
         <div className="auth-card page-in">
           <div className="auth-mobile-brand">
-            <span className="m-mark">S</span> Sanctum
+            <span className="m-mark">i</span> Interview AI
           </div>
           <div className="auth-card-header">
             <span className="card-kicker">— Sign in</span>
@@ -120,12 +120,12 @@ const Login = () => {
               type="submit"
               data-testid="login-submit"
             >
-              Sign in to Sanctum
+              Sign in to Interview AI
             </button>
           </form>
 
           <p className="auth-alt">
-            New to Sanctum? <Link to="/register">Enroll here →</Link>
+            New to Interview AI? <Link to="/register">Enroll here →</Link>
           </p>
         </div>
       </div>

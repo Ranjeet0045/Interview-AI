@@ -79,7 +79,7 @@ const Home = () => {
           </h1>
           <p className="desk-hero-sub">
             Paste a job description on the left, hand us a résumé (or a short bio) on the
-            right — Sanctum drafts the questions, the model answers, and a day-by-day
+            right — Interview AI drafts the questions, the model answers, and a day-by-day
             reading list.
           </p>
 

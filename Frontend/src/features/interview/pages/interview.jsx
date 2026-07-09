@@ -376,7 +376,7 @@ function generateResumePdfClientSide(report) {
 
   // Cover header
   setText(9, "bold", [90, 79, 62]);
-  doc.text("SANCTUM · INTERVIEW STUDY PLAN", margin, y);
+  doc.text("INTERVIEW AI · STUDY PLAN", margin, y);
   y += 22;
   setText(24, "bold", [30, 26, 21]);
   doc.text(doc.splitTextToSize(title, usableWidth), margin, y);
@@ -449,17 +449,17 @@ function generateResumePdfClientSide(report) {
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
     setText(8, "italic", [138, 125, 104]);
-    doc.text("Sanctum · Interview Study Desk", margin, pageHeight - 18);
+    doc.text("Interview AI · Your Study Desk", margin, pageHeight - 18);
     doc.text(`Page ${p} / ${totalPages}`, pageWidth - margin, pageHeight - 18, {
       align: "right",
     });
   }
 
-  const safe = (report.title || "sanctum_plan")
+  const safe = (report.title || "interview_ai_plan")
     .replace(/[^a-z0-9]+/gi, "_")
     .replace(/^_+|_+$/g, "")
     .toLowerCase();
-  doc.save(`${safe || "sanctum_plan"}.pdf`);
+  doc.save(`${safe || "interview_ai_plan"}.pdf`);
 }
 
 export default Interview;
