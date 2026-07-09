@@ -66,26 +66,110 @@
   }
 }
 
+/* Two-column layout: compact sidebar + main content (with skill-gaps banner inside) */
 .interview-page {
   display: grid;
-  grid-template-columns: 280px 1fr 300px;
+  grid-template-columns: 260px 1fr;
   gap: 1.25rem;
   padding: 1.5rem clamp(1rem, 3vw, 1.75rem) 2.5rem;
   max-width: $container-max;
   margin: 0 auto;
   width: 100%;
-
-  @media (max-width: 1100px) {
-    grid-template-columns: 250px 1fr 260px;
-    gap: 1rem;
-  }
+  align-items: start;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 
-/* Mobile tabs */
+/* ── Skill-gap banner: sits at the top of the main content ── */
+.gap-banner {
+  @include paper-card;
+  padding: 0.9rem 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+
+  .gb-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: $font-mono;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: $ink-3;
+    font-weight: 600;
+    padding-right: 0.75rem;
+    border-right: 1px solid $rule;
+    margin-right: 0.25rem;
+
+    &::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: $terracotta;
+      border-radius: 2px;
+    }
+  }
+
+  .gb-list {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .gap-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.32rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid;
+    background: $paper-3;
+    font-size: 0.82rem;
+    font-family: $font-body;
+    font-weight: 500;
+    transition: all $t-quick;
+
+    &::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    &.g-low {
+      border-color: rgba(90, 125, 63, 0.35);
+      color: #405a2c;
+      &::before { background: $moss; }
+      &:hover { background: rgba(90, 125, 63, 0.06); transform: translateY(-1px); }
+    }
+    &.g-medium {
+      border-color: rgba(181, 126, 26, 0.45);
+      color: #6b4b0f;
+      &::before { background: $amber; }
+      &:hover { background: rgba(181, 126, 26, 0.06); transform: translateY(-1px); }
+    }
+    &.g-high {
+      border-color: rgba(168, 62, 62, 0.4);
+      color: #7a2727;
+      &::before { background: $brick; }
+      &:hover { background: rgba(168, 62, 62, 0.06); transform: translateY(-1px); }
+    }
+  }
+
+  .gb-empty {
+    color: $ink-3;
+    font-style: italic;
+    font-family: $font-display;
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile tabs — only when we do NOT have skill-gaps as a third column any more */
 .interview-tabs {
   display: none;
   gap: 0.4rem;
@@ -93,7 +177,6 @@
   background: $paper-3;
   border: 1px solid $rule;
   border-radius: $r-sm;
-  grid-column: 1 / -1;
 
   @media (max-width: 900px) { display: flex; }
 
@@ -115,22 +198,21 @@
   }
 }
 
-@media (max-width: 900px) {
-  .interview-hidden { display: none; }
-}
-
 /* ── LEFT — Score & Nav ── */
 .side-left {
   @include paper-card;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  height: fit-content;
+  gap: 1.25rem;
   position: sticky;
   top: 5.5rem;
 
   @media (max-width: 900px) { position: static; }
+
+  &.mobile-hidden {
+    @media (max-width: 900px) { display: none; }
+  }
 }
 
 .score-ring {
@@ -145,7 +227,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0.5rem auto 0;
+  margin: 0.25rem auto 0;
   position: relative;
   animation: ringDraw 900ms $ease-out;
 
@@ -170,7 +252,7 @@
 
   .n {
     font-weight: 500;
-    font-size: 2.6rem;
+    font-size: 2.4rem;
     line-height: 1;
     color: $ink;
     letter-spacing: -0.03em;
@@ -192,27 +274,30 @@
   font-family: $font-display;
   font-style: italic;
   color: $ink-3;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+  margin: 0;
+  padding: 0 0.25rem;
+  line-height: 1.4;
 }
 
 .section-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
   border-top: 1px dashed $rule;
-  padding-top: 1.25rem;
+  padding-top: 1rem;
 
   .nav-btn {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.75rem 0.85rem;
+    gap: 0.55rem;
+    padding: 0.65rem 0.8rem;
     background: transparent;
     border: 1px solid transparent;
     border-radius: $r-sm;
     color: $ink-3;
     font-family: $font-body;
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
@@ -234,8 +319,8 @@
     .nav-count {
       margin-left: auto;
       font-family: $font-mono;
-      font-size: 0.72rem;
-      padding: 0.15rem 0.5rem;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
       border-radius: 999px;
       background: $paper-tint;
       color: $ink-3;
@@ -245,7 +330,7 @@
 
 .download-container {
   border-top: 1px dashed $rule;
-  padding-top: 1.25rem;
+  padding-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -253,8 +338,8 @@
 
 .download-btn {
   width: 100%;
-  padding: 0.85rem;
-  font-size: 0.9rem;
+  padding: 0.8rem;
+  font-size: 0.88rem;
 }
 
 .pdf-error {
@@ -265,36 +350,48 @@
 }
 
 /* ── MAIN ── */
-.content-main {
-  @include paper-card;
-  padding: 2rem;
+.content-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
+  min-width: 0;
 
-  @media (max-width: 900px) { padding: 1.5rem 1.25rem; }
+  &.mobile-hidden {
+    @media (max-width: 900px) { display: none; }
+  }
+}
+
+.content-main {
+  @include paper-card;
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  @media (max-width: 900px) { padding: 1.25rem 1.15rem; }
 }
 
 .content-head {
-  padding-bottom: 1.25rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid $rule;
 
   .c-kicker {
     font-family: $font-mono;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
     color: $ink-3;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     display: block;
   }
 
   h2 {
     font-family: $font-display;
     font-weight: 500;
-    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-size: clamp(1.5rem, 2.6vw, 1.9rem);
     letter-spacing: -0.025em;
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.3rem;
+    line-height: 1.1;
 
     em { font-style: italic; color: $terracotta; }
   }
@@ -303,14 +400,15 @@
     font-family: $font-display;
     font-style: italic;
     color: $ink-3;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    margin: 0;
   }
 }
 
 .q-list {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.6rem;
 }
 
 .q-card {
@@ -330,9 +428,9 @@
   .q-head {
     width: 100%;
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.1rem;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
     background: transparent;
     border: none;
     text-align: left;
@@ -347,23 +445,26 @@
     font-family: $font-display;
     font-weight: 600;
     font-style: italic;
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     color: $terracotta;
-    min-width: 28px;
-    line-height: 1;
+    min-width: 26px;
+    line-height: 1.5;
   }
 
   .q-text {
     flex: 1;
     color: $ink;
     font-family: $font-body;
-    font-size: 0.98rem;
-    line-height: 1.45;
+    font-size: 0.96rem;
+    line-height: 1.5;
+    font-weight: 500;
+    padding-top: 2px;
   }
 
   .q-toggle {
     flex-shrink: 0;
-    width: 26px; height: 26px;
+    margin-top: 3px;
+    width: 24px; height: 24px;
     border-radius: 50%;
     background: $paper-tint;
     color: $ink;
@@ -380,23 +481,28 @@
   }
 
   .q-body {
-    padding: 0.25rem 1.1rem 1.15rem;
+    padding: 0.15rem 1rem 1rem;
+    margin: 0 1rem 0.5rem;
+    border-top: 1px dashed $rule;
+    padding-top: 0.85rem;
     animation: bodyIn 320ms $ease-out;
 
     h4 {
       font-family: $font-mono;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.24em;
       text-transform: uppercase;
       color: $terracotta;
-      margin: 1rem 0 0.5rem;
+      margin: 0.75rem 0 0.35rem;
       font-weight: 600;
+
+      &:first-child { margin-top: 0.25rem; }
     }
 
     p {
       color: $ink-2;
-      font-size: 0.95rem;
-      line-height: 1.65;
+      font-size: 0.92rem;
+      line-height: 1.6;
       margin: 0;
       font-family: $font-body;
     }
@@ -412,23 +518,14 @@
 .roadmap-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
   position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 28px;
-    top: 10px; bottom: 10px;
-    width: 2px;
-    background: repeating-linear-gradient(to bottom, $rule 0 4px, transparent 4px 8px);
-  }
 }
 
 .roadmap-day {
   display: flex;
-  gap: 1rem;
-  padding: 1rem 1.1rem;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
   background: $paper-3;
   border: 1px solid $rule;
   border-radius: $r-sm;
@@ -442,7 +539,7 @@
 
   .day-mark {
     flex-shrink: 0;
-    width: 56px; height: 56px;
+    width: 52px; height: 52px;
     background: $ink;
     color: $paper;
     border-radius: $r-sm;
@@ -453,11 +550,10 @@
     font-family: $font-display;
     line-height: 1;
     box-shadow: 0 2px 0 $ink-2;
-    z-index: 1;
 
     .day-word {
       font-family: $font-mono;
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: rgba(244, 239, 226, 0.65);
@@ -465,36 +561,39 @@
     }
     .day-num {
       font-weight: 600;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-style: italic;
     }
   }
 
   .day-info {
     flex: 1;
+    min-width: 0;
 
     h3 {
       font-family: $font-display;
       font-weight: 500;
-      font-size: 1.05rem;
-      margin: 0 0 0.35rem;
+      font-size: 1.02rem;
+      margin: 0 0 0.25rem;
       color: $ink;
       letter-spacing: -0.01em;
+      line-height: 1.25;
     }
 
     ul {
       list-style: none;
       padding: 0;
-      margin: 0.35rem 0 0;
+      margin: 0.3rem 0 0;
       display: flex;
       flex-direction: column;
-      gap: 0.25rem;
+      gap: 0.2rem;
 
       li {
         color: $ink-2;
-        font-size: 0.88rem;
-        padding-left: 1rem;
+        font-size: 0.86rem;
+        padding-left: 0.9rem;
         position: relative;
+        line-height: 1.45;
 
         &::before {
           content: '·';
@@ -505,86 +604,6 @@
         }
       }
     }
-  }
-}
-
-/* ── RIGHT — Skill gaps ── */
-.side-right {
-  @include paper-card;
-  padding: 1.5rem;
-  height: fit-content;
-  position: sticky;
-  top: 5.5rem;
-
-  @media (max-width: 900px) { position: static; }
-
-  .side-title {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: $font-mono;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: $ink-3;
-    margin: 0 0 1rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px dashed $rule;
-    font-weight: 600;
-
-    &::before {
-      content: '';
-      width: 3px;
-      height: 14px;
-      background: $terracotta;
-      border-radius: 2px;
-    }
-  }
-}
-
-.gap-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.gap {
-  padding: 0.75rem 0.9rem;
-  border-radius: $r-sm;
-  font-size: 0.88rem;
-  font-family: $font-body;
-  font-weight: 500;
-  border: 1px solid;
-  background: $paper-3;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all $t-quick;
-
-  &::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-  }
-
-  &.g-low {
-    border-color: rgba(90, 125, 63, 0.35);
-    color: #405a2c;
-    &::before { background: $moss; }
-    &:hover { background: rgba(90, 125, 63, 0.06); }
-  }
-  &.g-medium {
-    border-color: rgba(181, 126, 26, 0.45);
-    color: #6b4b0f;
-    &::before { background: $amber; }
-    &:hover { background: rgba(181, 126, 26, 0.06); }
-  }
-  &.g-high {
-    border-color: rgba(168, 62, 62, 0.4);
-    color: #7a2727;
-    &::before { background: $brick; }
-    &:hover { background: rgba(168, 62, 62, 0.06); }
   }
 }
 
@@ -599,3 +618,5 @@
 
   &.error { color: $brick; }
 }
+
+.spin-sm { animation: sanctum-spin 900ms linear infinite; }
