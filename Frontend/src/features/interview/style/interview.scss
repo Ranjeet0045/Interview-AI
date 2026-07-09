@@ -6,6 +6,8 @@
   display: flex;
   flex-direction: column;
   animation: pageIn 620ms $ease-out both;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .interview-topbar {
@@ -19,8 +21,11 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  max-width: 100%;
+  overflow: hidden;
 
   .back-btn {
+    flex-shrink: 0;
     background: transparent;
     border: 1px solid $rule;
     border-radius: $r-sm;
@@ -38,11 +43,13 @@
   }
 
   .title-area {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2px;
+    overflow: hidden;
 
     .t-kicker {
       font-family: $font-mono;
@@ -58,6 +65,7 @@
       font-size: 1.05rem;
       margin: 0;
       color: $ink;
+      max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -76,6 +84,8 @@
   margin: 0 auto;
   width: 100%;
   align-items: start;
+  min-width: 0;
+  overflow-x: clip;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -91,6 +101,8 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  max-width: 100%;
+  overflow: hidden;
 
   .gb-label {
     display: inline-flex;
@@ -133,12 +145,17 @@
     font-family: $font-body;
     font-weight: 500;
     transition: all $t-quick;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &::before {
       content: '';
       width: 6px;
       height: 6px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
 
     &.g-low {
@@ -355,6 +372,8 @@
   flex-direction: column;
   gap: 1rem;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 
   &.mobile-hidden {
     @media (max-width: 900px) { display: none; }
@@ -367,6 +386,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  max-width: 100%;
+  overflow: hidden;
 
   @media (max-width: 900px) { padding: 1.25rem 1.15rem; }
 }
@@ -453,12 +474,16 @@
 
   .q-text {
     flex: 1;
+    min-width: 0;
     color: $ink;
     font-family: $font-body;
     font-size: 0.96rem;
     line-height: 1.5;
     font-weight: 500;
     padding-top: 2px;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
   }
 
   .q-toggle {
@@ -505,6 +530,9 @@
       line-height: 1.6;
       margin: 0;
       font-family: $font-body;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-word;
     }
   }
 }

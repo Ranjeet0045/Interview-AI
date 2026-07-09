@@ -6,16 +6,32 @@ import { useNavigate } from "react-router";
 import { jsPDF } from "jspdf";
 
 /**
- * Strip the noisy prefix + trim ellipsis / stray punctuation so the header
- * reads as a clean role name instead of the raw job description slice.
+ * Aggressively cleans and truncates the plan title. Handles the case
+ * where the deployed backend still stores the raw first-50 chars of the
+ * job description as the title — we never want that ticker-style overflow.
  */
 function cleanTitle(raw) {
-  if (!raw) return "Untitled plan";
-  return String(raw)
+  if (!raw) return "Your study plan";
+  let t = String(raw)
     .replace(/^Interview\s*Plan\s*[·\-–:]\s*/i, "")
     .replace(/^interview plan/i, "")
     .replace(/[…\-·:.\s]+$/g, "")
-    .trim() || "New interview plan";
+    .trim();
+
+  if (!t) return "Your study plan";
+
+  // If it still looks like a raw job posting slice, cut to the first
+  // clean phrase — hard-cap to 48 chars with a graceful ellipsis.
+  const firstFragment = t.split(/(?:[.!?\n]|\s+·\s+)/)[0] || t;
+  if (firstFragment.length < t.length) t = firstFragment.trim();
+
+  if (t.length > 48) {
+    // stop at last word boundary before 48 chars
+    const trimmed = t.slice(0, 48);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    t = (lastSpace > 20 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "…";
+  }
+  return t;
 }
 
 const Interview = () => {

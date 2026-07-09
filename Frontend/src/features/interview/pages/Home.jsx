@@ -8,12 +8,21 @@ import UserProfileSection from "../components/UI/UserProfileSection";
 import { useNavigate } from "react-router";
 
 function cleanReportTitle(raw) {
-  if (!raw) return "Untitled plan";
-  return String(raw)
+  if (!raw) return "Your study plan";
+  let t = String(raw)
     .replace(/^Interview\s*Plan\s*[·\-–:]\s*/i, "")
     .replace(/^interview plan/i, "")
     .replace(/[…\-·:.\s]+$/g, "")
-    .trim() || "New interview plan";
+    .trim();
+  if (!t) return "Your study plan";
+  const firstFragment = t.split(/(?:[.!?\n]|\s+·\s+)/)[0] || t;
+  if (firstFragment.length < t.length) t = firstFragment.trim();
+  if (t.length > 48) {
+    const trimmed = t.slice(0, 48);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    t = (lastSpace > 20 ? trimmed.slice(0, lastSpace) : trimmed).trim() + "…";
+  }
+  return t;
 }
 
 const Home = () => {
