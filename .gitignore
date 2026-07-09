@@ -16,3 +16,9 @@ Thumbs.db
 
 # Logs
 *.log
+.env.*
+*.env
+credentials.json
+*.pem
+*.key
+.credentials
