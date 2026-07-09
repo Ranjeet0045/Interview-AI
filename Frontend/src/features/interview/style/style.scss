@@ -70,6 +70,10 @@
   color: $ink-3;
 
   .dot { color: $rule-2; }
+
+  @media (max-width: 480px) {
+    display: none;
+  }
 }
 
 /* Right side: study card metrics */
